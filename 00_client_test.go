@@ -77,7 +77,10 @@ func TestAds(t *testing.T) {
 	c2, err := c.AsUser(ctx, defaultUID)
 	TU.FatalIf(t, err)
 
-	ad, err := c2.CreateAd(ctx, defaultUID, &sdk.CreateAdRequest{Name: "ad.png", GroupID: "1", Width: 300, Height: 250}, dummyPNG(300, 250))
+	ad, err := c2.CreateAd(ctx, defaultUID, &sdk.CreateAdRequest{
+		Name: "ad.png", GroupID: "1", Width: 300, Height: 250,
+		LandingURL: "https://test.com", AdImage: dummyPNG(300, 250),
+	})
 	TU.FatalIf(t, err)
 
 	t.Logf("New AD: %+v", ad)

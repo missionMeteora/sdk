@@ -41,9 +41,13 @@ type Ad struct {
 }
 
 // CreateAd will create an Advertisement for a given user ID
-func (c *Client) CreateAd(ctx context.Context, uid string, req *CreateAdRequest, r io.Reader) (ad *Ad, err error) {
+func (c *Client) CreateAd(ctx context.Context, uid string, req *CreateAdRequest) (ad *Ad, err error) {
 	if uid == "" {
 		err = ErrMissingUID
+		return
+	}
+
+	if err = req.validate(); err != nil {
 		return
 	}
 
@@ -62,9 +66,9 @@ func (c *Client) CreateAd(ctx context.Context, uid string, req *CreateAdRequest,
 	}
 
 	if !req.Encoded {
-		pipeObj["data"] = ptk.Base64ToJSON(nil, mt, r)
+		pipeObj["data"] = ptk.Base64ToJSON(nil, mt, req.AdImage)
 	} else {
-		pipeObj["data"] = io.MultiReader(bytes.NewReader(quoteBytes), r, bytes.NewReader(quoteBytes))
+		pipeObj["data"] = io.MultiReader(bytes.NewReader(quoteBytes), req.AdImage, bytes.NewReader(quoteBytes))
 	}
 
 	imageReq := ptk.PipeJSONObject(pipeObj)
@@ -102,7 +106,9 @@ func (c *Client) CreateAdFromFile(ctx context.Context, uid string, req *CreateAd
 	}
 	defer f.Close()
 
-	return c.CreateAd(ctx, uid, req, f)
+	req.AdImage = f
+
+	return c.CreateAd(ctx, uid, req)
 }
 
 // UpdateAd will update an ad
@@ -182,6 +188,8 @@ type CreateAdRequest struct {
 	ImpTracker   string `json:"impTrack,omitempty"`
 	ClickTracker string `json:"clickTrack,omitempty"`
 	Encoded      bool   `json:"encoded,omitempty"`
+
+	AdImage io.Reader `json:"-"`
 }
 
 func (r *CreateAdRequest) toAd(iid, iloc string) *Ad {
@@ -205,7 +213,11 @@ func (r *CreateAdRequest) toAd(iid, iloc string) *Ad {
 }
 
 // Validate will validate a create ad request
-func (r *CreateAdRequest) Validate() error {
+func (r *CreateAdRequest) validate() error {
+	if r == nil {
+		return ErrRequestIsNil
+	}
+
 	if len(r.Name) == 0 {
 		return ErrInvalidName
 	}
@@ -218,10 +230,13 @@ func (r *CreateAdRequest) Validate() error {
 		return ErrInvalidAdSize
 	}
 
+	if r.AdImage == nil {
+		return ErrMissingAdImage
+	}
 	return nil
 }
 
-func allowedAdRectsString() string {
+func AllowedAdRectsString() string {
 	out := make([]string, 0, len(allowedAdRects))
 	for _, rect := range allowedAdRects {
 		out = append(out, fmt.Sprintf("%dx%x", rect.Width, rect.Height))
@@ -230,13 +245,13 @@ func allowedAdRectsString() string {
 }
 
 // Rects represent a unit of width and height
-type Rects struct {
+type Rect struct {
 	Width  int
 	Height int
 }
 
 var (
-	allowedAdRects = []Rects{
+	allowedAdRects = []Rect{
 		{Width: 300, Height: 250},
 		{Width: 320, Height: 50},
 		{Width: 300, Height: 50},

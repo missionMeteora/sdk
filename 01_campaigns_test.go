@@ -61,7 +61,10 @@ func TestCampaigns(t *testing.T) {
 	agID, err = c2.CreateAdGroup(ctx, defaultUID, "SDK Test Campaign")
 	TU.FatalIf(t, err)
 
-	ad, err = c2.CreateAd(ctx, defaultUID, &sdk.CreateAdRequest{Name: "sdkTestCampaign.png", GroupID: agID, Width: 300, Height: 250}, dummyPNG(300, 250))
+	ad, err = c2.CreateAd(ctx, defaultUID, &sdk.CreateAdRequest{
+		Name: "sdkTestCampaign.png", GroupID: agID, Width: 300, Height: 250,
+		LandingURL: "https://test.com", AdImage: dummyPNG(300, 250),
+	})
 	TU.FatalIf(t, err)
 
 	segID, err = c2.CreateSegment(ctx, defaultUID, &sdk.Segment{Name: "SDK Test Campaign"})
@@ -76,4 +79,50 @@ func TestCampaigns(t *testing.T) {
 		Adgroups: []string{agID},
 	})
 	TU.FatalIf(t, err)
+}
+
+func TestCreateFullCampaign(t *testing.T) {
+	c := sdk.NewWithAddr(localAPI, adminKey)
+
+	c2, err := c.AsUser(ctx, "3") // meteora user
+	TU.FatalIf(t, err)
+
+	req := &sdk.CreateFullCampaignRequest{
+		Campaign: &sdk.Campaign{
+			Name:   "SDK Test Full Campaign",
+			Budget: 50,
+		},
+
+		CampaignApps: []sdk.App{
+			&sdk.AppAdvBidding{BaseCPM: 2, MaxCPM: 5},
+		},
+
+		Ads: []*sdk.CreateAdRequest{
+			{
+				Name: "sdkTestCampaign-1.png", Width: 300, Height: 250,
+				LandingURL: "https://test.com", AdImage: dummyPNG(300, 250),
+			},
+			{
+				Name: "sdkTestCampaign-2.png", Width: 300, Height: 250,
+				LandingURL: "https://test.com", AdImage: dummyPNG(300, 250),
+			},
+		},
+
+		Segments: []*sdk.Segment{
+			{Name: "Full Segment"},
+		},
+
+		ProximitySegment: []*sdk.ProximitySegment{
+			dummyProxSeg("Full Proximity Segment"),
+		},
+
+		IsDraft: true,
+	}
+
+	cmp, err := c2.CreateFullCampaign(ctx, defaultUID, req)
+	TU.FatalIf(t, err)
+
+	defer req.Rollback(c2)
+
+	t.Logf("%+v", cmp)
 }

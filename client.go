@@ -14,32 +14,45 @@ import (
 
 const (
 	// Version is the current SDK version
-	Version       = "v0.5"
-	DefaultServer = "https://meteora.us"
+	Version = "v0.5"
+
+	// DefaultServer is the default api server used
+	DefaultServer = "xxxhttps://meteora.us"
 )
 
 // common errors
 var (
-	// ErrMissingUID is returned when a user ID is expected and missing
 	ErrMissingUID = errors.New("missing user id")
 
-	// ErrMissingCID is returned when a campaign ID is expected and missing
 	ErrMissingCID = errors.New("missing campaign id")
 
-	// ErrMissingSegID is returned when a segment ID is expected and missing
 	ErrMissingSegID = errors.New("missing segment id")
 
-	// ErrDateRange is returned for invalid or missing date ranges
+	ErrMissingSegName = errors.New("missing segment name")
+
+	ErrMissingProxSegName = errors.New("missing proximity segment name")
+
+	ErrMissingLocations = errors.New("must specify at least one proximity location")
+
 	ErrDateRange = errors.New("bad or missing date range")
 
-	// ErrInvalidName is returned when a name is invalid
 	ErrInvalidName = errors.New("invalid name")
 
-	// ErrInvalidLanding is returned when a landing url is invalid
 	ErrInvalidLanding = errors.New("invalid landing url")
 
-	// ErrInvalidAdSize is returned when an invalid ad size is provided
-	ErrInvalidAdSize = fmt.Errorf("invalid ad size, the accepted sizes are: %s", allowedAdRectsString())
+	ErrMissingAdImage = errors.New("missing ad image")
+
+	ErrMissingAds = errors.New("must pass at least one ad")
+
+	ErrInvalidAdSize = fmt.Errorf("invalid ad size, the accepted sizes are: %s", AllowedAdRectsString())
+
+	ErrInvalidBudget = fmt.Errorf("invalid budget, must be between $%d and %d", CampaignMinimumBudget, CampaignMaximumBudget)
+
+	ErrInvalidImpBudget = fmt.Errorf("invalid imp budget, must be less than %d", CampaignMaximumImpBudget)
+
+	ErrInvalidSchedule = errors.New("invalid schedule provided")
+
+	ErrRequestIsNil = errors.New("request is nil")
 )
 
 // New returns a new instance with the default server addr and given apiKey.
