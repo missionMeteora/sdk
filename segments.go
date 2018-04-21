@@ -29,9 +29,7 @@ func (c *Client) CreateSegment(ctx context.Context, uid string, seg *Segment) (i
 		return
 	}
 
-	var resp struct {
-		ID string `json:"id"`
-	}
+	var resp idOrDataResp
 
 	seg.AdvertiserID = uid
 	seg.UniqueUsers = 0
@@ -51,7 +49,7 @@ func (c *Client) CreateSegment(ctx context.Context, uid string, seg *Segment) (i
 		return
 	}
 
-	id = resp.ID
+	id = resp.String()
 	seg.SegmentID = id
 
 	return

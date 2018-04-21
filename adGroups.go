@@ -19,14 +19,9 @@ func (c *Client) CreateAdGroup(ctx context.Context, uid, name string) (id string
 	}
 
 	var (
-		req struct {
-			Name    string `json:"name"`
-			AdCount int    `json:"adCount"` // not 100% this is needed but it might break the dash if it's not there
-		}
+		req AdGroup
 
-		resp struct {
-			ID string `json:"id"`
-		}
+		resp idOrDataResp
 	)
 
 	// Set request name to match provided name
@@ -37,7 +32,7 @@ func (c *Client) CreateAdGroup(ctx context.Context, uid, name string) (id string
 	}
 
 	// Set ID as the response ID
-	id = resp.ID
+	id = resp.String()
 	return
 }
 
@@ -48,7 +43,7 @@ func (c *Client) ListAdGroups(ctx context.Context, uid string) (ags map[string]*
 		return
 	}
 
-	var resp []*struct {
+	var resp []struct {
 		ID   string   `json:"id"`
 		Data *AdGroup `json:"data"`
 	}

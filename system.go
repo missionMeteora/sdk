@@ -18,15 +18,13 @@ func (c *Client) GetAPIVersion(ctx context.Context) (ver string, err error) {
 
 // GetUserID returns the current key owner's uid.
 func (c *Client) GetUserID(ctx context.Context) (uid string, err error) {
-	var resp struct {
-		ID string `json:"id"`
-	}
+	var resp idOrDataResp
 
 	if err = c.rawGet(ctx, "userID", &resp); err != nil {
 		return
 	}
 
-	uid = resp.ID
+	uid = resp.String()
 	return
 }
 

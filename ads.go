@@ -127,7 +127,7 @@ func (c *Client) ListAds(ctx context.Context, uid string) (ads map[string]*Ad, e
 		return
 	}
 
-	var resp []*struct {
+	var resp []struct {
 		ID   string `json:"id"`
 		Data *Ad    `json:"data"`
 	}

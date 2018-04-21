@@ -56,3 +56,16 @@ func (roe *respOrError) Handle(s int, r io.Reader) (err error) {
 
 	return fmt.Errorf("multiple API errors: %q", er.Errors)
 }
+
+type idOrDataResp struct {
+	ID   string `json:"id"`
+	Data string `json:"data"`
+}
+
+func (id *idOrDataResp) String() string {
+	if id.ID != "" {
+		return id.ID
+	}
+
+	return id.Data
+}

@@ -55,9 +55,7 @@ func (c *Client) CreateProximitySegment(ctx context.Context, uid string, seg *Pr
 		return
 	}
 
-	var resp struct {
-		Data string `json:"data"`
-	}
+	var resp idOrDataResp
 
 	seg.OwnerID = uid
 	seg.IDCounter = len(seg.Locations)
@@ -74,7 +72,7 @@ func (c *Client) CreateProximitySegment(ctx context.Context, uid string, seg *Pr
 		return
 	}
 
-	id = resp.Data
+	id = resp.String()
 	seg.ID = id
 
 	return

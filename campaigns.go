@@ -16,7 +16,7 @@ const (
 // Campaign is a QoL alias for campaigns.Campaign
 type Campaign = struct {
 	ID      string `json:"id"`
-	OwnerID string `json:"-"`
+	OwnerID string `json:"ownerID"`
 
 	Active   bool `json:"active"`
 	Archived bool `json:"archived,omitempty"`
@@ -58,10 +58,7 @@ func (c *Client) createCampaign(ctx context.Context, uid string, cmp *Campaign, 
 	}
 
 	var (
-		resp struct {
-			ID   string `json:"id"`
-			Data string `json:"data"`
-		}
+		resp idOrDataResp
 
 		ep = "campaigns/byAdv/"
 	)
@@ -80,12 +77,7 @@ func (c *Client) createCampaign(ctx context.Context, uid string, cmp *Campaign, 
 		return
 	}
 
-	if drafts {
-		cid = resp.ID
-	} else {
-		cid = resp.Data
-	}
-
+	cid = resp.String()
 	return
 }
 
