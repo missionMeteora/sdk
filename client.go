@@ -17,7 +17,7 @@ const (
 	Version = "v0.5"
 
 	// DefaultServer is the default api server used
-	DefaultServer = "xxxhttps://meteora.us"
+	DefaultServer = "https://meteora.us"
 )
 
 // common errors
@@ -59,6 +59,8 @@ var (
 	ErrInvalidSchedule = errors.New("invalid schedule provided")
 
 	ErrRequestIsNil = errors.New("request is nil")
+
+	ErrCampaignIsNil = errors.New("campaign is nil")
 )
 
 // New returns a new instance with the default server addr and given apiKey.
@@ -96,7 +98,8 @@ func newClient(apiAddr *url.URL, apiKey string) *Client {
 	return c
 }
 
-// Client is a helper structure who holds onto an apiKey
+// Client is a Meteora API client.
+// All client funcs require a context.Context, however it can be set to nil.
 type Client struct {
 	u *url.URL
 	c ptk.HTTPClient

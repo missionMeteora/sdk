@@ -352,6 +352,9 @@ func (c *Client) CreateFullCampaign(ctx context.Context, uid string, req *Create
 
 // can't specify methods on aliased types
 func validateCampaign(c *Campaign) (err error) {
+	if c == nil {
+		return ErrCampaignIsNil
+	}
 	if len(c.Name) == 0 {
 		return ErrInvalidName
 	}
