@@ -55,25 +55,18 @@ func (c *Client) CreateProximitySegment(ctx context.Context, uid string, seg *Pr
 
 	var resp idOrDataResp
 
-	var pseg struct {
-		*ProximitySegment
-		RadiusThreshold uint16 `json:"radiusThreshold"`
-	}
-
-	pseg.ProximitySegment = seg
-	pseg.OwnerID = uid
-	pseg.IDCounter = len(seg.Locations)
-	pseg.RadiusThreshold = 2200
+	seg.OwnerID = uid
+	seg.IDCounter = len(seg.Locations)
 
 	// auto-fill location ids if needed
-	for i, loc := range pseg.Locations {
+	for i, loc := range seg.Locations {
 		loc.ID = strconv.Itoa(i)
 		if loc.Type == "" && loc.Center.Latitude != 0 && loc.Center.Longitude != 0 {
 			loc.Type = "circle"
 		}
 	}
 
-	if err = c.rawPost(ctx, "segments/proximity/byKey/"+uid, pseg, &resp); err != nil {
+	if err = c.rawPost(ctx, "segments/proximity/byKey/"+uid, seg, &resp); err != nil {
 		return
 	}
 
