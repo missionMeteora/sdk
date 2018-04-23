@@ -13,6 +13,17 @@ type CampaignReport struct {
 	Period        uint32              `json:"reportingPeriod,omitempty"`
 	InStoreVisits uint32              `json:"inStoreVisits,omitempty"`
 	Domains       map[string]ImpClick `json:"domains,omitempty"`
+	Visits        []Visit             `json:"visit,omtiempty"` // est visits please see terms
+}
+
+/// Visit is a single visit details
+type Visit struct {
+	CampaignID  string `json:"cid,omitempty"`
+	ProximityID string `json:"pxID,omitempty"`
+	Name        string `json:"pxName,omitempty"`
+	StoreName   string `json:"storeName,omitempty"`
+	StoreID     string `json:"storeID,omitempty"`
+	TS          int64  `json:"ts,omitempty"`
 }
 
 // ImpClick has the numbers of imps and clicks for a domain
