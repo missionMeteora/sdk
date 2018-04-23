@@ -21,8 +21,6 @@ type ProximitySegment = struct {
 
 	// Lookback period
 	Lookback int16 `json:"lookback"`
-	// Radius threshold for GPS padding
-	RadiusThreshold uint16 `json:"radiusThreshold"`
 }
 
 // Location represents a specified location
@@ -57,18 +55,25 @@ func (c *Client) CreateProximitySegment(ctx context.Context, uid string, seg *Pr
 
 	var resp idOrDataResp
 
-	seg.OwnerID = uid
-	seg.IDCounter = len(seg.Locations)
+	var pseg struct {
+		*ProximitySegment
+		RadiusThreshold uint16 `json:"radiusThreshold"`
+	}
+
+	pseg.ProximitySegment = seg
+	pseg.OwnerID = uid
+	pseg.IDCounter = len(seg.Locations)
+	pseg.RadiusThreshold = 2200
 
 	// auto-fill location ids if needed
-	for i, loc := range seg.Locations {
+	for i, loc := range pseg.Locations {
 		loc.ID = strconv.Itoa(i)
 		if loc.Type == "" && loc.Center.Latitude != 0 && loc.Center.Longitude != 0 {
 			loc.Type = "circle"
 		}
 	}
 
-	if err = c.rawPost(ctx, "segments/proximity/byKey/"+uid, seg, &resp); err != nil {
+	if err = c.rawPost(ctx, "segments/proximity/byKey/"+uid, pseg, &resp); err != nil {
 		return
 	}
 
