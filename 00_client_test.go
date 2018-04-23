@@ -3,6 +3,7 @@ package sdk_test
 import (
 	"bytes"
 	"context"
+	"flag"
 	"image"
 	"image/png"
 	"io"
@@ -16,13 +17,16 @@ import (
 )
 
 const (
-	localAPI = "http://localhost:8080/"
-	adminKey = "382787ed-6c36-4ca0-a3f1-6bcf926fea7c"
-
+	localAPI   = "http://localhost:8080/"
 	defaultUID = "3"
 )
 
+var adminKey string
+
 func init() {
+	flag.StringVar(&adminKey, "key", "382787ed-6c36-4ca0-a3f1-6bcf926fea7c", "local api admin key")
+	flag.Parse()
+
 	log.SetFlags(log.Lshortfile)
 }
 
