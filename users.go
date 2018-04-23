@@ -1,6 +1,9 @@
 package sdk
 
-import "context"
+import (
+	"context"
+	"regexp"
+)
 
 // Agency represents an agency user
 type Agency struct {
@@ -61,6 +64,58 @@ func (c *Client) ListAdvertisers(ctx context.Context, agencyID string) (out map[
 		adv.AgencyID = agencyID
 		out[adv.ID] = adv
 	}
+
+	return
+}
+
+type CreateAdvertiserRequest struct {
+	Name          string `json:"company"`       // required
+	Email         string `json:"email"`         // required
+	AgencyID      string `json:"agency"`        // Required
+	AdvertiserFee int    `json:"advertiserFee"` // required
+
+	Password        string `json:"pass"`        // optional, needed only if you want to login from the meteora dash
+	PasswordConfirm string `json:"passConfirm"` // not needed, filled automatically if password is set
+}
+
+var emailRE = regexp.MustCompile(`.+@.+\.\w+`)
+
+func (c *Client) CreateAdvertiser(ctx context.Context, req *CreateAdvertiserRequest) (uid string, err error) {
+	if req == nil {
+		err = ErrRequestIsNil
+		return
+	}
+	if req.Name == "" {
+		err = ErrInvalidName
+		return
+	}
+
+	if !emailRE.MatchString(req.Email) {
+		err = ErrInvalidEmail
+		return
+	}
+
+	if req.AgencyID == "" {
+		err = ErrInvalidAgencyID
+		return
+	}
+
+	if req.Password != "" {
+		if len(req.Password) < 8 {
+			err = ErrInvalidPassword
+			return
+		}
+
+		req.PasswordConfirm = req.Password
+	}
+
+	var resp idOrDataResp
+
+	if err = c.rawPost(ctx, "signUp/advertiser/"+req.AgencyID, req, &resp); err != nil {
+		return
+	}
+
+	uid = resp.String()
 
 	return
 }

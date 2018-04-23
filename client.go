@@ -38,6 +38,12 @@ var (
 
 	ErrInvalidName = errors.New("invalid name")
 
+	ErrInvalidAgencyID = errors.New("invalid agency id")
+
+	ErrInvalidEmail = errors.New("invalid email")
+
+	ErrInvalidPassword = errors.New("password must be at least 8 characters")
+
 	ErrInvalidLanding = errors.New("invalid landing url")
 
 	ErrMissingAdImage = errors.New("missing ad image")

@@ -185,6 +185,23 @@ func TestLists(t *testing.T) {
 	}
 }
 
+func TestCreateAdvertiser(t *testing.T) {
+	c := sdk.NewWithAddr(localAPI, adminKey)
+	ts := time.Now().Format("20060102150405")
+
+	req := &sdk.CreateAdvertiserRequest{
+		Name:     "Test Adv (" + ts + ")",
+		AgencyID: "2",
+		Email:    ts + "@test.org",
+	}
+
+	t.Log(req)
+
+	uid, err := c.CreateAdvertiser(ctx, req)
+	TU.FatalIf(t, err)
+
+	t.Logf("new advertiser id: %s", uid)
+}
 func TestHeatmaps(t *testing.T) {
 	c := sdk.NewWithAddr(localAPI, adminKey)
 
