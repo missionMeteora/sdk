@@ -76,6 +76,7 @@ type CreateAdvertiserRequest struct {
 
 	Password        string `json:"pass"`        // optional, needed only if you want to login from the meteora dash
 	PasswordConfirm string `json:"passConfirm"` // not needed, filled automatically if password is set
+	Status          bool   `json:"status"`      // automatically set
 }
 
 var emailRE = regexp.MustCompile(`.+@.+\.\w+`)
@@ -108,6 +109,8 @@ func (c *Client) CreateAdvertiser(ctx context.Context, req *CreateAdvertiserRequ
 
 		req.PasswordConfirm = req.Password
 	}
+
+	req.Status = true
 
 	var resp idOrDataResp
 
