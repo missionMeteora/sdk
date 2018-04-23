@@ -21,8 +21,6 @@ type ProximitySegment = struct {
 
 	// Lookback period
 	Lookback int16 `json:"lookback"`
-	// Radius threshold for GPS padding
-	RadiusThreshold uint16 `json:"radiusThreshold"`
 }
 
 // Location represents a specified location

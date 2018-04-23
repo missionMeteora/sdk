@@ -6,14 +6,13 @@ import (
 
 // CampaignReport represents a basic campaign report
 type CampaignReport struct {
-	ID            string              `json:"id"`
-	Imp           int64               `json:"imp,omitempty"`
-	Clicks        int64               `json:"clicks,omitempty"`
-	Spent         float64             `json:"spent,omitempty"`
-	Period        uint32              `json:"reportingPeriod,omitempty"`
-	InStoreVisits uint32              `json:"inStoreVisits,omitempty"`
-	Domains       map[string]ImpClick `json:"domains,omitempty"`
-	Visits        []Visit             `json:"visit,omtiempty"` // est visits please see terms
+	ID      string              `json:"id"`
+	Imp     int64               `json:"imp,omitempty"`
+	Clicks  int64               `json:"clicks,omitempty"`
+	Spent   float64             `json:"spent,omitempty"`
+	Period  uint32              `json:"reportingPeriod,omitempty"`
+	Domains map[string]ImpClick `json:"domains,omitempty"`
+	Visits  []Visit             `json:"visit,omtiempty"` // est visits please see terms
 }
 
 /// Visit is a single visit details
