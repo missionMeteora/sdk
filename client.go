@@ -85,6 +85,7 @@ func newClient(apiAddr *url.URL, apiKey string) *Client {
 				"X-APIKEY":      {apiKey},
 			},
 		},
+		k: apiKey,
 		u: apiAddr, // less pointer derefs, and the Client itself is a pointer so we don't have to worry about copies.
 	}
 
@@ -101,13 +102,14 @@ func newClient(apiAddr *url.URL, apiKey string) *Client {
 // Client is a Meteora API client.
 // All client funcs require a context.Context, however it can be set to nil.
 type Client struct {
-	u *url.URL
 	c ptk.HTTPClient
+	u *url.URL
+	k string
 }
 
 // CurrentKey returns the API key used to initalize this client
 func (c *Client) CurrentKey() string {
-	return c.c.DefaultHeaders.Get("X-APIKEY")
+	return c.k
 }
 
 // RawRequest is an alias for RawRequestCtx(context.Background(), method, endpoint, req, resp)
