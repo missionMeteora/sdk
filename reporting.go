@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"context"
+	"time"
 )
 
 // CampaignReport represents a basic campaign report
@@ -65,6 +66,14 @@ func (c *Client) GetCampaignReport(ctx context.Context, uid, cid, start, end str
 	if start == "" || end == "" {
 		err = ErrDateRange
 		return
+	}
+
+	if start == "-1" {
+		start = time.Now().UTC().AddDate(-1, 0, 0).Format("20060102")
+	}
+
+	if end == "-1" {
+		start = time.Now().UTC().Format("20060102")
 	}
 
 	ep := "r/campaignStats/" + uid + "/" + cid + "/" + start + "-" + end
