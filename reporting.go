@@ -98,6 +98,14 @@ func (c *Client) GetAdsReport(ctx context.Context, uid, start, end string) (rp m
 		return
 	}
 
+	if start == "-1" {
+		start = time.Now().UTC().AddDate(-1, 0, 0).Format("20060102")
+	}
+
+	if end == "-1" {
+		start = time.Now().UTC().Format("20060102")
+	}
+
 	ep := "adsStats/" + uid + "/" + start + "/" + end
 
 	if err = c.rawGet(ctx, ep, &rp); err != nil {
