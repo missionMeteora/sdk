@@ -14,7 +14,7 @@ const (
 )
 
 // Campaign is a QoL alias for campaigns.Campaign
-type Campaign = struct {
+type Campaign struct {
 	ID      string `json:"id"`
 	OwnerID string `json:"ownerID"`
 

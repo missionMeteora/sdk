@@ -14,7 +14,7 @@ import (
 
 const (
 	// Version is the current SDK version
-	Version = "v0.5"
+	Version = "v0.6"
 
 	// DefaultServer is the default api server used
 	DefaultServer = "https://meteora.us"

@@ -6,7 +6,7 @@ import (
 )
 
 // Segment is a segment by proximity location
-type ProximitySegment = struct {
+type ProximitySegment struct {
 	ID      string `json:"id,omitempty"` // this is strictly used by the SDK
 	Name    string `json:"name"`
 	OwnerID string `json:"ownerID"`
@@ -24,7 +24,7 @@ type ProximitySegment = struct {
 }
 
 // Location represents a specified location
-type Location = struct {
+type Location struct {
 	// ID of location
 	ID string `json:"id"`
 	// Label of the location
@@ -40,7 +40,7 @@ type Location = struct {
 }
 
 // Coords are a set of coordinates
-type Coords = struct {
+type Coords struct {
 	// Note, the json keys for these values are setup to match google's coordinate object
 	Latitude  float64 `json:"lat"`
 	Longitude float64 `json:"lng"`
