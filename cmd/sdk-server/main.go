@@ -1,9 +1,9 @@
 package main
 
 import (
-	"net/url"
 	"log"
 	"net/http"
+	"net/url"
 	"sync"
 
 	"github.com/missionMeteora/apiserv"
@@ -14,7 +14,7 @@ import (
 const version = "sdk " + sdk.Version + ", server v0.1"
 
 var (
-	live = kingpin.Flag("live", "are we using the live api endpoints").Short('l').Bool()
+	live    = kingpin.Flag("live", "are we using the live api endpoints").Short('l').Bool()
 	apiAddr = kingpin.Flag("apiAddr", "local api addr").Default("http://localhost:8080").Short('a').String()
 
 	addr = kingpin.Flag("addr", "listen addr").Default(":8081").String()
@@ -24,7 +24,7 @@ var (
 	apiPrefix = kingpin.Flag("prefix", "api route prefix").Default("/api/v1").Short('p').String()
 
 	pongResp = apiserv.NewJSONResponse("pong")
-	verResp = apiserv.NewJSONResponse(version)
+	verResp  = apiserv.NewJSONResponse(version)
 )
 
 func main() {
@@ -64,10 +64,10 @@ func main() {
 	}
 }
 
-type clientHandler struct{
+type clientHandler struct {
 	addr string
-	g apiserv.Group
-	m sync.Map
+	g    apiserv.Group
+	m    sync.Map
 }
 
 func (ch *clientHandler) getClient(ctx *apiserv.Context) (_ *sdk.Client) {

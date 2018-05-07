@@ -3,8 +3,8 @@
 package main
 
 import (
-	"net/http"
 	"context"
+	"net/http"
 
 	"github.com/missionMeteora/apiserv"
 	"github.com/missionMeteora/sdk"
@@ -20,7 +20,6 @@ func (ch *clientHandler) getClient(ctx *apiserv.Context) *sdk.Client {
 		return nil
 }
 */
-
 
 func (ch *clientHandler) CreateAd(ctx *apiserv.Context) apiserv.Response { // method:POST
 	c := ch.getClient(ctx)
@@ -594,4 +593,3 @@ func (ch *clientHandler) init() {
 	ch.g.AddRoute("PUT", "/proximitySegment", ch.UpdateProximitySegment)
 	ch.g.AddRoute("PUT", "/segment", ch.UpdateSegment)
 }
-

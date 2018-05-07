@@ -3,20 +3,21 @@
 package main
 
 import (
-	"sort"
-	"github.com/missionMeteora/apiserv"
-	"unicode/utf8"
-	"unicode"
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"log"
-	"github.com/OneOfOne/xast"
-	"strings"
 	"reflect"
+	"sort"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+
+	"github.com/OneOfOne/xast"
+	"github.com/missionMeteora/apiserv"
 )
 
 var (
-	_  = json.Marshal
+	_ = json.Marshal
 	_ = fmt.Print
 
 	cv reflect.Value
@@ -24,7 +25,7 @@ var (
 
 type MethodSignature struct {
 	xast.Func
-	Route string
+	Route   string
 	ReqType string
 }
 
@@ -62,16 +63,16 @@ func makeMethodSig(f *xast.Func) (ms *MethodSignature) {
 	return
 }
 
-var ignoredFuncs = map[string]bool {
-	"RawRequest": true,
-	"RawRequestCtx": true,
-	"CurrentKey": true,
-	"AsUser": true,
-	"GetUserID": true,
-	"UserAPIKey": true,
-	"GetAPIVersion": true,
+var ignoredFuncs = map[string]bool{
+	"RawRequest":       true,
+	"RawRequestCtx":    true,
+	"CurrentKey":       true,
+	"AsUser":           true,
+	"GetUserID":        true,
+	"UserAPIKey":       true,
+	"GetAPIVersion":    true,
 	"CreateAdFromFile": true,
-	"ListAdsFilter": true,
+	"ListAdsFilter":    true,
 }
 
 func main() {
@@ -110,7 +111,7 @@ func main() {
 
 	var (
 		allMethods []*MethodSignature
-		b strings.Builder
+		b          strings.Builder
 	)
 
 	b.WriteString(header)
@@ -162,21 +163,22 @@ func getTmpl(b *strings.Builder, ms *MethodSignature) {
 }
 
 var _ apiserv.Context
-func postTmpl(b *strings.Builder, ms *MethodSignature){
+
+func postTmpl(b *strings.Builder, ms *MethodSignature) {
 	fmt.Fprintf(b, "\nfunc (ch *clientHandler) %s(ctx *apiserv.Context) apiserv.Response { // method:%s\n", ms.Name, ms.ReqType)
 	fmt.Fprintf(b, "\tc := ch.getClient(ctx)\n\tif ctx.Done() {\n\t\treturn nil\n\t}\n\n")
 
 	var params []string
 	for _, p := range ms.Params[1:] {
 		if p.Type == "string" {
-			params = append(params, `, ctx.Param("` + p.Name + `")`)
+			params = append(params, `, ctx.Param("`+p.Name+`")`)
 			continue
 		}
 		fmt.Fprintf(b, "\tvar %s *sdk.%s\n", p.Name, p.Type[1:]) // strip the *
 		fmt.Fprintf(b, "\tif err := ctx.BindJSON(&%s); err != nil {\n", p.Name)
 		b.WriteString("\t\treturn apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)\n\t}\n\n")
 
-		params = append(params, ", " + p.Name)
+		params = append(params, ", "+p.Name)
 	}
 
 	if len(ms.Results) == 1 {
