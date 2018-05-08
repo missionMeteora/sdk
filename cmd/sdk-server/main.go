@@ -137,33 +137,17 @@ func (ch *clientHandler) GetCampaignReport(ctx *apiserv.Context) apiserv.Respons
 		return nil
 	}
 	var (
-		callsKey             = fmt.Sprintf("client:%p", c)
 		uid, cid, start, end = ctx.Param("uid"), ctx.Param("cid"), ctx.Param("start"), ctx.Param("end")
-		calls                uint64
-	)
 
-	ch.c.Update(callsKey, func(old interface{}) (_ interface{}, _ bool, _ time.Duration) {
-		calls, _ := old.(uint64)
-		calls++
-		return calls, true, time.Hour
-	})
-
-	if calls > maxReportingCallsPerHour {
-		return apiserv.NewJSONErrorResponse(http.StatusTooManyRequests,
-			fmt.Sprintf("you went over your hourly request limit of %d by %d",
-				maxReportingCallsPerHour, calls-maxReportingCallsPerHour,
-			))
-	}
-
-	cacheKey := cache.Key(uid, cid, start, end)
-	if data, ok := ch.c.Get(cacheKey); ok {
-		return apiserv.NewJSONResponse(data)
-	}
-
-	var (
 		data interface{}
 		err  error
+
+		cacheKey, resp = ch.checkReportCache(ctx, c, uid, cid, start, end)
 	)
+
+	if resp != nil {
+		return resp
+	}
 
 	ch.c.Update(cacheKey, func(old interface{}) (_ interface{}, _ bool, _ time.Duration) {
 		if data = old; data == nil {
@@ -187,40 +171,21 @@ func (ch *clientHandler) GetAdsReport(ctx *apiserv.Context) apiserv.Response {
 	}
 
 	var (
-		callsKey        = fmt.Sprintf("client:%p", c)
 		uid, start, end = ctx.Param("uid"), ctx.Param("start"), ctx.Param("end")
-		calls           uint64
-	)
 
-	ch.c.Update(callsKey, func(old interface{}) (_ interface{}, _ bool, _ time.Duration) {
-		calls, _ := old.(uint64)
-		calls++
-		return calls, true, time.Hour
-	})
-
-	if calls > maxReportingCallsPerHour {
-		return apiserv.NewJSONErrorResponse(http.StatusTooManyRequests,
-			fmt.Sprintf("you went over your hourly request limit of %d by %d",
-				maxReportingCallsPerHour, calls-maxReportingCallsPerHour,
-			))
-	}
-
-	cacheKey := cache.Key(uid, start, end)
-	if data, ok := ch.c.Get(cacheKey); ok {
-		return apiserv.NewJSONResponse(data)
-	}
-
-	var (
 		data interface{}
 		err  error
+
+		cacheKey, resp = ch.checkReportCache(ctx, c, uid, start, end)
 	)
 
-	log.Println(uid, sdk.DateToTime(start), sdk.DateToTime(end))
+	if resp != nil {
+		return resp
+	}
 
 	ch.c.Update(cacheKey, func(old interface{}) (_ interface{}, _ bool, _ time.Duration) {
 		if data = old; data == nil {
 			data, err = c.GetAdsReport(context.Background(), uid, sdk.DateToTime(start), sdk.DateToTime(end))
-			log.Println(err)
 		}
 
 		return data, false, time.Hour * 3
@@ -231,4 +196,33 @@ func (ch *clientHandler) GetAdsReport(ctx *apiserv.Context) apiserv.Response {
 	}
 
 	return apiserv.NewJSONResponse(data)
+}
+
+func (ch *clientHandler) checkReportCache(ctx *apiserv.Context, c *sdk.Client, cacheKeyParts ...interface{}) (cacheKey string, resp apiserv.Response) {
+	var (
+		callsKey = fmt.Sprintf("client:%p", c)
+		calls    uint64
+	)
+
+	ch.c.Update(callsKey, func(old interface{}) (_ interface{}, _ bool, _ time.Duration) {
+		calls, _ := old.(uint64)
+		calls++
+		return calls, true, time.Hour
+	})
+
+	if calls > maxReportingCallsPerHour {
+		resp = apiserv.NewJSONErrorResponse(http.StatusTooManyRequests,
+			fmt.Sprintf("you went over your hourly request limit of %d by %d",
+				maxReportingCallsPerHour, calls-maxReportingCallsPerHour,
+			))
+		return
+	}
+
+	cacheKey = cache.Key(cacheKeyParts...)
+	if data, ok := ch.c.Get(cacheKey); ok {
+		resp = apiserv.NewJSONResponse(data)
+		return
+	}
+
+	return
 }
