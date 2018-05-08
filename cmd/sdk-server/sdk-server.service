@@ -1,0 +1,20 @@
+[Unit]
+Description=SDK Server
+After=network.target
+
+[Service]
+User=deploy
+Group=deploy
+Environment=HOME=/home/deploy/
+WorkingDirectory=/home/deploy/go/src/github.com/missionMeteora/sdk
+ExecStartPre=/sbin/setcap 'cap_net_bind_service=+ep' /home/deploy/go/bin/sdk-server
+ExecStart=/home/deploy/go/bin/sdk-server --live --letsencrypt --addr https://rest.meteora.us
+Restart=always
+StartLimitInterval=600
+TimeoutStartSec=300s
+LimitNOFILE=10000
+RestartSec=60
+PermissionsStartOnly=true
+
+[Install]
+WantedBy=multi-user.target
