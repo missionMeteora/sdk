@@ -5,6 +5,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"go/ast"
 	"log"
 	"reflect"
 	"sort"
@@ -69,26 +70,29 @@ var ignoredFuncs = map[string]bool{
 	"CurrentKey":       true,
 	"AsUser":           true,
 	"GetUserID":        true,
-	"UserAPIKey":       true,
+	"GetUserAPIKey":    true,
 	"GetAPIVersion":    true,
 	"CreateAdFromFile": true,
 	"ListAdsFilter":    true,
+	"GetAgencies":      true,
+
+	"GetCampaignReport": true,
+	"GetAdsReport":      true,
 }
 
 func main() {
 	log.SetFlags(log.Lshortfile)
 	// c := sdk.New("")
 	d := xast.NewDumper(func(name, typ string) bool {
-		// log.Println(name, typ)
-		// switch typ {
-		// case "struct":
-		// 	return name == "Client"
-		// case "func":
-		// 	if strings.HasPrefix(name, "Client.") {
-		// 		n := name[7:]
-		// 		return ast.IsExported(n) && !ignoredFuncs[n]
-		// 	}
-		// }
+		switch typ {
+		case "struct":
+			return name == "Client"
+		case "func":
+			if strings.HasPrefix(name, "Client.") {
+				n := name[7:]
+				return ast.IsExported(n) && !ignoredFuncs[n]
+			}
+		}
 
 		return true
 	})
@@ -133,7 +137,15 @@ func main() {
 	b.WriteString("\nfunc (ch *clientHandler) init() {\n")
 	for _, ms := range allMethods {
 		b.WriteByte('\t')
-		fmt.Fprintf(&b, `ch.g.AddRoute("%s", "/%s", ch.%s)`, ms.ReqType, ms.Route, ms.Name)
+		fmt.Fprintf(&b, `ch.g.AddRoute("%s", "/%s`, ms.ReqType, ms.Route)
+		for _, p := range ms.Params[1:] {
+			switch p.Type {
+			case "string", "time.Time":
+				fmt.Fprintf(&b, "/:%s", p.Name)
+			}
+		}
+
+		fmt.Fprintf(&b, `", ch.%s)`, ms.Name)
 		b.WriteByte('\n')
 	}
 	b.WriteString("}\n")
@@ -148,17 +160,26 @@ func getTmpl(b *strings.Builder, ms *MethodSignature) {
 	fmt.Fprintf(b, "\tc := ch.getClient(ctx)\n\tif ctx.Done() {\n\t\treturn nil\n\t}\n\n")
 
 	if len(ms.Results) == 1 {
-		fmt.Fprintf(b, "\tdata, err := \"OK\", c.%s(context.Background()", ms.Name)
+		fmt.Fprintf(b, "\terr := c.%s(context.Background()", ms.Name)
 	} else {
 		fmt.Fprintf(b, "\tdata, err := c.%s(context.Background()", ms.Name)
 	}
 
 	for _, f := range ms.Params[1:] {
-		fmt.Fprintf(b, `, ctx.Param("%s")`, f.Name)
+		if f.Type == "time.Time" {
+			fmt.Fprintf(b, `, sdk.DateToTime(ctx.Param("%s"))`, f.Name)
+		} else {
+			fmt.Fprintf(b, `, ctx.Param("%s")`, f.Name)
+		}
 	}
+
 	b.WriteString(")\n")
 	b.WriteString("\tif err != nil {\n\t\treturn apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)\n\t}\n\n")
-	b.WriteString("\treturn apiserv.NewJSONResponse(data)\n")
+	if len(ms.Results) == 1 {
+		b.WriteString("\t return apiserv.RespOK\n")
+	} else {
+		b.WriteString("\treturn apiserv.NewJSONResponse(data)\n")
+	}
 	b.WriteString("}\n")
 }
 
@@ -174,6 +195,11 @@ func postTmpl(b *strings.Builder, ms *MethodSignature) {
 			params = append(params, `, ctx.Param("`+p.Name+`")`)
 			continue
 		}
+		if p.Type == "time.Time" {
+			params = append(params, `, sdk.DateToTime(ctx.Param("`+p.Name+`"))`)
+			continue
+
+		}
 		fmt.Fprintf(b, "\tvar %s *sdk.%s\n", p.Name, p.Type[1:]) // strip the *
 		fmt.Fprintf(b, "\tif err := ctx.BindJSON(&%s); err != nil {\n", p.Name)
 		b.WriteString("\t\treturn apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)\n\t}\n\n")
@@ -182,7 +208,7 @@ func postTmpl(b *strings.Builder, ms *MethodSignature) {
 	}
 
 	if len(ms.Results) == 1 {
-		fmt.Fprintf(b, "\tdata, err := \"OK\", c.%s(context.Background()", ms.Name)
+		fmt.Fprintf(b, "\terr := c.%s(context.Background()", ms.Name)
 	} else {
 		fmt.Fprintf(b, "\tdata, err := c.%s(context.Background()", ms.Name)
 	}
@@ -193,7 +219,11 @@ func postTmpl(b *strings.Builder, ms *MethodSignature) {
 
 	b.WriteString(")\n")
 	b.WriteString("\tif err != nil {\n\t\treturn apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)\n\t}\n\n")
-	b.WriteString("\treturn apiserv.NewJSONResponse(data)\n")
+	if len(ms.Results) == 1 {
+		b.WriteString("\t return apiserv.RespOK\n")
+	} else {
+		b.WriteString("\treturn apiserv.NewJSONResponse(data)\n")
+	}
 	b.WriteString("}\n")
 }
 

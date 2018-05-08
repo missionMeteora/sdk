@@ -3,8 +3,8 @@
 package main
 
 import (
-	"context"
 	"net/http"
+	"context"
 
 	"github.com/missionMeteora/apiserv"
 	"github.com/missionMeteora/sdk"
@@ -20,6 +20,7 @@ func (ch *clientHandler) getClient(ctx *apiserv.Context) *sdk.Client {
 		return nil
 }
 */
+
 
 func (ch *clientHandler) CreateAd(ctx *apiserv.Context) apiserv.Response { // method:POST
 	c := ch.getClient(ctx)
@@ -174,12 +175,12 @@ func (ch *clientHandler) DeleteAd(ctx *apiserv.Context) apiserv.Response {
 		return nil
 	}
 
-	data, err := "OK", c.DeleteAd(context.Background(), ctx.Param("adID"))
+	err := c.DeleteAd(context.Background(), ctx.Param("adID"))
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteAdGroup(ctx *apiserv.Context) apiserv.Response {
@@ -188,12 +189,12 @@ func (ch *clientHandler) DeleteAdGroup(ctx *apiserv.Context) apiserv.Response {
 		return nil
 	}
 
-	data, err := "OK", c.DeleteAdGroup(context.Background(), ctx.Param("adgroupID"))
+	err := c.DeleteAdGroup(context.Background(), ctx.Param("adgroupID"))
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteCampaign(ctx *apiserv.Context) apiserv.Response {
@@ -202,12 +203,12 @@ func (ch *clientHandler) DeleteCampaign(ctx *apiserv.Context) apiserv.Response {
 		return nil
 	}
 
-	data, err := "OK", c.DeleteCampaign(context.Background(), ctx.Param("cid"))
+	err := c.DeleteCampaign(context.Background(), ctx.Param("cid"))
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteDraftCampaign(ctx *apiserv.Context) apiserv.Response {
@@ -216,12 +217,12 @@ func (ch *clientHandler) DeleteDraftCampaign(ctx *apiserv.Context) apiserv.Respo
 		return nil
 	}
 
-	data, err := "OK", c.DeleteDraftCampaign(context.Background(), ctx.Param("cid"))
+	err := c.DeleteDraftCampaign(context.Background(), ctx.Param("cid"))
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteProximitySegment(ctx *apiserv.Context) apiserv.Response {
@@ -230,12 +231,12 @@ func (ch *clientHandler) DeleteProximitySegment(ctx *apiserv.Context) apiserv.Re
 		return nil
 	}
 
-	data, err := "OK", c.DeleteProximitySegment(context.Background(), ctx.Param("segID"))
+	err := c.DeleteProximitySegment(context.Background(), ctx.Param("segID"))
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteSegment(ctx *apiserv.Context) apiserv.Response {
@@ -244,26 +245,12 @@ func (ch *clientHandler) DeleteSegment(ctx *apiserv.Context) apiserv.Response {
 		return nil
 	}
 
-	data, err := "OK", c.DeleteSegment(context.Background(), ctx.Param("segID"))
+	err := c.DeleteSegment(context.Background(), ctx.Param("segID"))
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
-}
-
-func (ch *clientHandler) GetAdsReport(ctx *apiserv.Context) apiserv.Response {
-	c := ch.getClient(ctx)
-	if ctx.Done() {
-		return nil
-	}
-
-	data, err := c.GetAdsReport(context.Background(), ctx.Param("uid"), ctx.Param("start"), ctx.Param("end"))
-	if err != nil {
-		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
-	}
-
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) GetCampaign(ctx *apiserv.Context) apiserv.Response {
@@ -273,20 +260,6 @@ func (ch *clientHandler) GetCampaign(ctx *apiserv.Context) apiserv.Response {
 	}
 
 	data, err := c.GetCampaign(context.Background(), ctx.Param("cid"))
-	if err != nil {
-		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
-	}
-
-	return apiserv.NewJSONResponse(data)
-}
-
-func (ch *clientHandler) GetCampaignReport(ctx *apiserv.Context) apiserv.Response {
-	c := ch.getClient(ctx)
-	if ctx.Done() {
-		return nil
-	}
-
-	data, err := c.GetCampaignReport(context.Background(), ctx.Param("uid"), ctx.Param("cid"), ctx.Param("start"), ctx.Param("end"))
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
@@ -315,20 +288,6 @@ func (ch *clientHandler) GetHeatmap(ctx *apiserv.Context) apiserv.Response {
 	}
 
 	data, err := c.GetHeatmap(context.Background(), ctx.Param("uid"))
-	if err != nil {
-		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
-	}
-
-	return apiserv.NewJSONResponse(data)
-}
-
-func (ch *clientHandler) GetUserAPIKey(ctx *apiserv.Context) apiserv.Response {
-	c := ch.getClient(ctx)
-	if ctx.Done() {
-		return nil
-	}
-
-	data, err := c.GetUserAPIKey(context.Background(), ctx.Param("uid"))
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
@@ -473,12 +432,12 @@ func (ch *clientHandler) UpdateAd(ctx *apiserv.Context) apiserv.Response { // me
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	data, err := "OK", c.UpdateAd(context.Background(), ad)
+	err := c.UpdateAd(context.Background(), ad)
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) UpdateCampaign(ctx *apiserv.Context) apiserv.Response { // method:PUT
@@ -492,12 +451,12 @@ func (ch *clientHandler) UpdateCampaign(ctx *apiserv.Context) apiserv.Response {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	data, err := "OK", c.UpdateCampaign(context.Background(), cmp)
+	err := c.UpdateCampaign(context.Background(), cmp)
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) UpdateDraftCampaign(ctx *apiserv.Context) apiserv.Response { // method:PUT
@@ -511,12 +470,12 @@ func (ch *clientHandler) UpdateDraftCampaign(ctx *apiserv.Context) apiserv.Respo
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	data, err := "OK", c.UpdateDraftCampaign(context.Background(), cmp)
+	err := c.UpdateDraftCampaign(context.Background(), cmp)
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) UpdateProximitySegment(ctx *apiserv.Context) apiserv.Response { // method:PUT
@@ -530,12 +489,12 @@ func (ch *clientHandler) UpdateProximitySegment(ctx *apiserv.Context) apiserv.Re
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	data, err := "OK", c.UpdateProximitySegment(context.Background(), seg)
+	err := c.UpdateProximitySegment(context.Background(), seg)
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) UpdateSegment(ctx *apiserv.Context) apiserv.Response { // method:PUT
@@ -549,47 +508,45 @@ func (ch *clientHandler) UpdateSegment(ctx *apiserv.Context) apiserv.Response { 
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	data, err := "OK", c.UpdateSegment(context.Background(), seg)
+	err := c.UpdateSegment(context.Background(), seg)
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	return apiserv.NewJSONResponse(data)
+	 return apiserv.RespOK
 }
 
 func (ch *clientHandler) init() {
-	ch.g.AddRoute("POST", "/ad", ch.CreateAd)
-	ch.g.AddRoute("POST", "/adGroup", ch.CreateAdGroup)
+	ch.g.AddRoute("POST", "/ad/:uid", ch.CreateAd)
+	ch.g.AddRoute("POST", "/adGroup/:uid/:name", ch.CreateAdGroup)
 	ch.g.AddRoute("POST", "/advertiser", ch.CreateAdvertiser)
-	ch.g.AddRoute("POST", "/campaign", ch.CreateCampaign)
-	ch.g.AddRoute("POST", "/draftCampaign", ch.CreateDraftCampaign)
-	ch.g.AddRoute("POST", "/fullCampaign", ch.CreateFullCampaign)
-	ch.g.AddRoute("POST", "/proximitySegment", ch.CreateProximitySegment)
-	ch.g.AddRoute("POST", "/segment", ch.CreateSegment)
-	ch.g.AddRoute("DELETE", "/ad", ch.DeleteAd)
-	ch.g.AddRoute("DELETE", "/adGroup", ch.DeleteAdGroup)
-	ch.g.AddRoute("DELETE", "/campaign", ch.DeleteCampaign)
-	ch.g.AddRoute("DELETE", "/draftCampaign", ch.DeleteDraftCampaign)
-	ch.g.AddRoute("DELETE", "/proximitySegment", ch.DeleteProximitySegment)
-	ch.g.AddRoute("DELETE", "/segment", ch.DeleteSegment)
-	ch.g.AddRoute("GET", "/adsReport", ch.GetAdsReport)
-	ch.g.AddRoute("GET", "/campaign", ch.GetCampaign)
-	ch.g.AddRoute("GET", "/campaignReport", ch.GetCampaignReport)
-	ch.g.AddRoute("GET", "/draftCampaign", ch.GetDraftCampaign)
-	ch.g.AddRoute("GET", "/heatmap", ch.GetHeatmap)
-	ch.g.AddRoute("GET", "/userAPIKey", ch.GetUserAPIKey)
-	ch.g.AddRoute("GET", "/adGroups", ch.ListAdGroups)
-	ch.g.AddRoute("GET", "/ads", ch.ListAds)
-	ch.g.AddRoute("GET", "/adsByAdGroup", ch.ListAdsByAdGroup)
-	ch.g.AddRoute("GET", "/advertisers", ch.ListAdvertisers)
+	ch.g.AddRoute("POST", "/campaign/:uid", ch.CreateCampaign)
+	ch.g.AddRoute("POST", "/draftCampaign/:uid", ch.CreateDraftCampaign)
+	ch.g.AddRoute("POST", "/fullCampaign/:uid", ch.CreateFullCampaign)
+	ch.g.AddRoute("POST", "/proximitySegment/:uid", ch.CreateProximitySegment)
+	ch.g.AddRoute("POST", "/segment/:uid", ch.CreateSegment)
+	ch.g.AddRoute("DELETE", "/ad/:adID", ch.DeleteAd)
+	ch.g.AddRoute("DELETE", "/adGroup/:adgroupID", ch.DeleteAdGroup)
+	ch.g.AddRoute("DELETE", "/campaign/:cid", ch.DeleteCampaign)
+	ch.g.AddRoute("DELETE", "/draftCampaign/:cid", ch.DeleteDraftCampaign)
+	ch.g.AddRoute("DELETE", "/proximitySegment/:segID", ch.DeleteProximitySegment)
+	ch.g.AddRoute("DELETE", "/segment/:segID", ch.DeleteSegment)
+	ch.g.AddRoute("GET", "/campaign/:cid", ch.GetCampaign)
+	ch.g.AddRoute("GET", "/draftCampaign/:cid", ch.GetDraftCampaign)
+	ch.g.AddRoute("GET", "/heatmap/:uid", ch.GetHeatmap)
+	ch.g.AddRoute("GET", "/adGroups/:uid", ch.ListAdGroups)
+	ch.g.AddRoute("GET", "/ads/:uid", ch.ListAds)
+	ch.g.AddRoute("GET", "/adsByAdGroup/:uid/:adGroupID", ch.ListAdsByAdGroup)
+	ch.g.AddRoute("GET", "/advertisers/:agencyID", ch.ListAdvertisers)
 	ch.g.AddRoute("GET", "/agencies", ch.ListAgencies)
-	ch.g.AddRoute("GET", "/campaigns", ch.ListCampaigns)
-	ch.g.AddRoute("GET", "/draftCampaigns", ch.ListDraftCampaigns)
-	ch.g.AddRoute("GET", "/proximitySegments", ch.ListProximitySegments)
-	ch.g.AddRoute("GET", "/segments", ch.ListSegments)
+	ch.g.AddRoute("GET", "/campaigns/:uid", ch.ListCampaigns)
+	ch.g.AddRoute("GET", "/draftCampaigns/:uid", ch.ListDraftCampaigns)
+	ch.g.AddRoute("GET", "/proximitySegments/:uid", ch.ListProximitySegments)
+	ch.g.AddRoute("GET", "/segments/:uid", ch.ListSegments)
 	ch.g.AddRoute("PUT", "/ad", ch.UpdateAd)
 	ch.g.AddRoute("PUT", "/campaign", ch.UpdateCampaign)
 	ch.g.AddRoute("PUT", "/draftCampaign", ch.UpdateDraftCampaign)
 	ch.g.AddRoute("PUT", "/proximitySegment", ch.UpdateProximitySegment)
 	ch.g.AddRoute("PUT", "/segment", ch.UpdateSegment)
 }
+

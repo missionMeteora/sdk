@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/PathDNA/ptk"
+	"github.com/PathDNA/ptk/cache"
 )
 
 const (
@@ -85,8 +87,9 @@ func newClient(apiAddr *url.URL, apiKey string) *Client {
 				"X-APIKEY":      {apiKey},
 			},
 		},
-		k: apiKey,
-		u: apiAddr, // less pointer derefs, and the Client itself is a pointer so we don't have to worry about copies.
+		cache: cache.NewMemCache(time.Hour * 6),
+		u:     apiAddr, // less pointer derefs, and the Client itself is a pointer so we don't have to worry about copies.
+		k:     apiKey,
 	}
 
 	if c.u.Scheme == "https+insecure" {
@@ -102,9 +105,10 @@ func newClient(apiAddr *url.URL, apiKey string) *Client {
 // Client is a Meteora API client.
 // All client funcs require a context.Context, however it can be set to nil.
 type Client struct {
-	c ptk.HTTPClient
-	u *url.URL
-	k string
+	c     ptk.HTTPClient
+	cache *cache.MemCache
+	u     *url.URL
+	k     string
 }
 
 // CurrentKey returns the API key used to initalize this client
