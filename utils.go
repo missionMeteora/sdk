@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
+	"time"
 )
 
 type errorResp struct {
@@ -68,4 +70,52 @@ func (id *idOrDataResp) String() string {
 	}
 
 	return id.Data
+}
+
+func getStartEnd(start, end time.Time) (s, e string, err error) {
+	if start.IsZero() || end.IsZero() {
+		err = ErrDateRange
+		return
+	}
+
+	if start == AllTime {
+		s = time.Now().UTC().AddDate(-1, 0, 0).Format("2006-01-02")
+	} else {
+		s = start.UTC().AddDate(-1, 0, 0).Format("2006-01-02")
+	}
+
+	if end == AllTime {
+		e = time.Now().UTC().Format("2006-01-02")
+	} else {
+		e = end.UTC().Format("2006-01-02")
+	}
+
+	return
+}
+
+func DateToTime(date string) time.Time {
+	if date == "-1" {
+		return AllTime
+	}
+
+	if t, err := time.Parse(`20060102`, date); err == nil {
+		return t.UTC()
+	}
+
+	if t, err := time.Parse(`2006-01-02`, date); err == nil {
+		return t.UTC()
+	}
+
+	if t, err := time.Parse(`02 Jan 06`, date); err == nil {
+		return t.UTC()
+	}
+
+	if u, err := strconv.ParseInt(date, 10, 64); err == nil {
+		if len(date) > 10 { // js timestamps are in MS
+			u /= 1000
+		}
+		return time.Unix(u, 0)
+	}
+
+	return time.Time{}
 }

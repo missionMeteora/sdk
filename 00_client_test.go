@@ -99,7 +99,7 @@ func TestAds(t *testing.T) {
 		t.Fatalf("expected to find the ad in the ads list, but we didn't :(\n%+v", ad)
 	}
 
-	as, err := c.GetAdsReport(ctx, defaultUID, "2017-01-02", "2018-02-22")
+	as, err := c.GetAdsReport(ctx, defaultUID, sdk.DateToTime("2017-01-02"), sdk.DateToTime("2018-02-22"))
 	t.Log(as, err)
 	TU.FatalIf(t, c2.DeleteAd(ctx, ad.ID))
 	TU.FatalIf(t, err)

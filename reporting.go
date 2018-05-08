@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+var (
+	AllTime = time.Unix(-1, 0)
+)
+
 // CampaignReport represents a basic campaign report
 type CampaignReport struct {
 	ID      string              `json:"id"`
@@ -52,7 +56,7 @@ type Click = struct {
 }
 
 // GetCampaignReport will generate a report for a given campaign ID and date range
-func (c *Client) GetCampaignReport(ctx context.Context, uid, cid, start, end string) (cs *CampaignReport, err error) {
+func (c *Client) GetCampaignReport(ctx context.Context, uid, cid string, start, end time.Time) (cs *CampaignReport, err error) {
 	if uid == "" {
 		err = ErrMissingUID
 		return
@@ -63,20 +67,12 @@ func (c *Client) GetCampaignReport(ctx context.Context, uid, cid, start, end str
 		return
 	}
 
-	if start == "" || end == "" {
-		err = ErrDateRange
+	var s, e string
+	if s, e, err = getStartEnd(start, end); err != nil {
 		return
 	}
 
-	if start == "-1" {
-		start = time.Now().UTC().AddDate(-1, 0, 0).Format("20060102")
-	}
-
-	if end == "-1" {
-		start = time.Now().UTC().Format("20060102")
-	}
-
-	ep := "r/campaignStats/" + uid + "/" + cid + "/" + start + "-" + end
+	ep := "r/campaignStats/" + uid + "/" + cid + "/" + s + "-" + e
 
 	if err = c.rawGet(ctx, ep, &cs); err != nil {
 		return
@@ -87,26 +83,18 @@ func (c *Client) GetCampaignReport(ctx context.Context, uid, cid, start, end str
 }
 
 // GetAdsReport will generate a advertisements report for a given user ID and date range
-func (c *Client) GetAdsReport(ctx context.Context, uid, start, end string) (rp map[string]*AdReport, err error) {
+func (c *Client) GetAdsReport(ctx context.Context, uid string, start, end time.Time) (rp map[string]*AdReport, err error) {
 	if uid == "" {
 		err = ErrMissingUID
 		return
 	}
 
-	if start == "" || end == "" {
-		err = ErrDateRange
+	var s, e string
+	if s, e, err = getStartEnd(start, end); err != nil {
 		return
 	}
 
-	if start == "-1" {
-		start = time.Now().UTC().AddDate(-1, 0, 0).Format("20060102")
-	}
-
-	if end == "-1" {
-		start = time.Now().UTC().Format("20060102")
-	}
-
-	ep := "adsStats/" + uid + "/" + start + "/" + end
+	ep := "adsStats/" + uid + "/" + s + "/" + e
 
 	if err = c.rawGet(ctx, ep, &rp); err != nil {
 		return

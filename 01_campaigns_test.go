@@ -15,7 +15,7 @@ func TestListCampaigns(t *testing.T) {
 
 	for _, cmp := range cmps {
 		t.Logf("Campaign: %+v", cmp)
-		t.Log(c.GetCampaignReport(ctx, defaultUID, cmp.ID, "20180101", "20180102"))
+		t.Log(c.GetCampaignReport(ctx, defaultUID, cmp.ID, sdk.DateToTime("20180101"), sdk.DateToTime("20180102")))
 	}
 
 	cmps, err = c.ListDraftCampaigns(ctx, defaultUID)
