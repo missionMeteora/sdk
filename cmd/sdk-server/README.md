@@ -34,7 +34,7 @@ GET /api/v1/proximitySegments/:uid -> ListProximitySegments
 GET /api/v1/segments/:uid -> ListSegments
 
 POST /api/v1/ad/:uid -> CreateAd
-POST /api/v1/adGroup/:uid/:name -> CreateAdGroup
+POST /api/v1/adGroup/:uid -> CreateAdGroup
 POST /api/v1/advertiser -> CreateAdvertiser
 POST /api/v1/campaign/:uid -> CreateCampaign
 POST /api/v1/draftCampaign/:uid -> CreateDraftCampaign
@@ -62,11 +62,15 @@ GET /adsReport/:uid/:start/:end
 GET /campaignReport/:uid/:cid/:start/:end
 ```
 
+### Notes
+
+- For [CreateAd](https://godoc.org/github.com/missionMeteora/sdk#Client.CreateAd), [CreateAdRequest.AdImage](https://godoc.org/github.com/missionMeteora/sdk#CreateAdRequest) must be a fully encoded base64 image.
+
 ### Examples
 
 #### [ListAdvertisers](https://godoc.org/github.com/missionMeteora/sdk#Client.ListAdvertisers)
 
-```json
+```
 ➤ curl "https://rest.meteora.us/api/v1/advertisers/[your-agency-id]?apiKey=[your-meteora-api-key]" | jq
 
 {
@@ -89,4 +93,34 @@ GET /campaignReport/:uid/:cid/:start/:end
 	"code": 200,
 	"success": true
 }
+```
+
+#### [CreateSegment](https://godoc.org/github.com/missionMeteora/sdk#Client.CreateSegment) with [Segment](https://godoc.org/github.com/missionMeteora/sdk#Segment)
+
+For any POST/GET requests that uses a struct, you need to match the required struct fields.
+
+```
+# Content-Type: application/json is required for any POST/PUT rquests.
+➤ curl -H "Content-Type: application/json" -d '{"name": "segment name"}' 'http://localhost:8081/api/v1/segment/2?apiKey=382787ed-6c36-4ca0-a3f1-6bcf926fea7c'
+
+{
+	"data": "segment-id",
+	"code":200,
+	"success":true
+}
+
+```
+
+#### [CreateAdGroup](https://godoc.org/github.com/missionMeteora/sdk#Client.CreateAdGroup)
+
+```
+# Content-Type: application/json is required for any POST/PUT rquests.
+➤ curl -H "Content-Type: application/json" -d '{"name": "ad group name"}' 'http://localhost:8081/api/v1/adGroup/2?apiKey=382787ed-6c36-4ca0-a3f1-6bcf926fea7c'
+
+{
+	"data": "adgroup-id",
+	"code":200,
+	"success":true
+}
+
 ```

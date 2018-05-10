@@ -25,7 +25,7 @@ var (
 	live    = kingpin.Flag("live", "are we using the live api endpoints").Short('l').Bool()
 	apiAddr = kingpin.Flag("apiAddr", "local api addr").Default("http://localhost:8080").Short('a').String()
 
-	debug = kingpin.Flag("debug", "log requests").Short('d').Bool()
+	debug = kingpin.Flag("debug", "log requests").Short('d').Counter()
 
 	addr = kingpin.Flag("addr", "listen addr").Default(":8081").String()
 
@@ -50,11 +50,12 @@ func main() {
 		c: cache.NewMemCache(time.Minute * 15),
 	}
 
-	if *debug {
-		ch.g.Use(apiserv.LogRequests(false))
+	if *debug > 0 {
+		ch.g.Use(apiserv.LogRequests(*debug > 1))
 	}
-	ch.g.AddRoute("GET", "/adsReport/:uid/:start/:end", ch.GetAdsReport)
-	ch.g.AddRoute("GET", "/campaignReport/:uid/:cid/:start/:end", ch.GetCampaignReport)
+
+	ch.g.GET("/adsReport/:uid/:start/:end", ch.GetAdsReport)
+	ch.g.GET("/campaignReport/:uid/:cid/:start/:end", ch.GetCampaignReport)
 
 	ch.g.GET("/ping", func(*apiserv.Context) apiserv.Response { return pongResp })
 	ch.g.GET("/version", func(*apiserv.Context) apiserv.Response { return verResp })
