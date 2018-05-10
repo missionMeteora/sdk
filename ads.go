@@ -65,10 +65,21 @@ func (c *Client) CreateAd(ctx context.Context, uid string, req *CreateAdRequest)
 		"height": req.Height,
 	}
 
-	if !req.Encoded {
-		pipeObj["data"] = ptk.Base64ToJSON(nil, mt, req.AdImage)
-	} else {
-		pipeObj["data"] = io.MultiReader(bytes.NewReader(quoteBytes), req.AdImage, bytes.NewReader(quoteBytes))
+	// this is needed to support the sdk-server,
+	// otherwise there is no other way to create an ad.
+	switch img := req.AdImage.(type) {
+	case io.Reader:
+		if !req.Encoded {
+			pipeObj["data"] = ptk.Base64ToJSON(nil, mt, img)
+		} else {
+			pipeObj["data"] = io.MultiReader(bytes.NewReader(quoteBytes), img, bytes.NewReader(quoteBytes))
+		}
+	case string:
+		if !strings.HasPrefix(img, "data:"+mt+";base64,") {
+			err = fmt.Errorf("unexpected base64 data, the image data must start with: `data:%s;base64,`", mt)
+			return
+		}
+		pipeObj["data"] = strings.NewReader(img)
 	}
 
 	imageReq := ptk.PipeJSONObject(pipeObj)
@@ -189,7 +200,7 @@ type CreateAdRequest struct {
 	ClickTracker string `json:"clickTrack,omitempty"`
 	Encoded      bool   `json:"encoded,omitempty"`
 
-	AdImage io.Reader `json:"-"`
+	AdImage interface{} `json:"adImage,omitempty"`
 }
 
 func (r *CreateAdRequest) toAd(iid, iloc string) *Ad {

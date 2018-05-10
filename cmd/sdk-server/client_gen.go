@@ -3,8 +3,8 @@
 package main
 
 import (
-	"net/http"
 	"context"
+	"net/http"
 
 	"github.com/missionMeteora/apiserv"
 	"github.com/missionMeteora/sdk"
@@ -20,7 +20,6 @@ func (ch *clientHandler) getClient(ctx *apiserv.Context) *sdk.Client {
 		return nil
 }
 */
-
 
 func (ch *clientHandler) CreateAd(ctx *apiserv.Context) apiserv.Response { // method:POST
 	c := ch.getClient(ctx)
@@ -47,7 +46,15 @@ func (ch *clientHandler) CreateAdGroup(ctx *apiserv.Context) apiserv.Response { 
 		return nil
 	}
 
-	data, err := c.CreateAdGroup(context.Background(), ctx.Param("uid"), ctx.Param("name"))
+	var req struct {
+		Name string `json:"name"`
+	}
+
+	if err := ctx.BindJSON(&req); err != nil {
+		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
+	}
+
+	data, err := c.CreateAdGroup(context.Background(), ctx.Param("uid"), req.Name)
 	if err != nil {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
@@ -180,7 +187,7 @@ func (ch *clientHandler) DeleteAd(ctx *apiserv.Context) apiserv.Response {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteAdGroup(ctx *apiserv.Context) apiserv.Response {
@@ -194,7 +201,7 @@ func (ch *clientHandler) DeleteAdGroup(ctx *apiserv.Context) apiserv.Response {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteCampaign(ctx *apiserv.Context) apiserv.Response {
@@ -208,7 +215,7 @@ func (ch *clientHandler) DeleteCampaign(ctx *apiserv.Context) apiserv.Response {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteDraftCampaign(ctx *apiserv.Context) apiserv.Response {
@@ -222,7 +229,7 @@ func (ch *clientHandler) DeleteDraftCampaign(ctx *apiserv.Context) apiserv.Respo
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteProximitySegment(ctx *apiserv.Context) apiserv.Response {
@@ -236,7 +243,7 @@ func (ch *clientHandler) DeleteProximitySegment(ctx *apiserv.Context) apiserv.Re
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) DeleteSegment(ctx *apiserv.Context) apiserv.Response {
@@ -250,7 +257,7 @@ func (ch *clientHandler) DeleteSegment(ctx *apiserv.Context) apiserv.Response {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) GetCampaign(ctx *apiserv.Context) apiserv.Response {
@@ -437,7 +444,7 @@ func (ch *clientHandler) UpdateAd(ctx *apiserv.Context) apiserv.Response { // me
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) UpdateCampaign(ctx *apiserv.Context) apiserv.Response { // method:PUT
@@ -456,7 +463,7 @@ func (ch *clientHandler) UpdateCampaign(ctx *apiserv.Context) apiserv.Response {
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) UpdateDraftCampaign(ctx *apiserv.Context) apiserv.Response { // method:PUT
@@ -475,7 +482,7 @@ func (ch *clientHandler) UpdateDraftCampaign(ctx *apiserv.Context) apiserv.Respo
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) UpdateProximitySegment(ctx *apiserv.Context) apiserv.Response { // method:PUT
@@ -494,7 +501,7 @@ func (ch *clientHandler) UpdateProximitySegment(ctx *apiserv.Context) apiserv.Re
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) UpdateSegment(ctx *apiserv.Context) apiserv.Response { // method:PUT
@@ -513,12 +520,12 @@ func (ch *clientHandler) UpdateSegment(ctx *apiserv.Context) apiserv.Response { 
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
-	 return apiserv.RespOK
+	return apiserv.RespOK
 }
 
 func (ch *clientHandler) init() {
 	ch.g.AddRoute("POST", "/ad/:uid", ch.CreateAd)
-	ch.g.AddRoute("POST", "/adGroup/:uid/:name", ch.CreateAdGroup)
+	ch.g.AddRoute("POST", "/adGroup/:uid", ch.CreateAdGroup)
 	ch.g.AddRoute("POST", "/advertiser", ch.CreateAdvertiser)
 	ch.g.AddRoute("POST", "/campaign/:uid", ch.CreateCampaign)
 	ch.g.AddRoute("POST", "/draftCampaign/:uid", ch.CreateDraftCampaign)
@@ -549,4 +556,3 @@ func (ch *clientHandler) init() {
 	ch.g.AddRoute("PUT", "/proximitySegment", ch.UpdateProximitySegment)
 	ch.g.AddRoute("PUT", "/segment", ch.UpdateSegment)
 }
-

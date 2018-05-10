@@ -4,13 +4,26 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "run sdk-server",
+			"label": "build sdk-server",
 			"type": "shell",
-			"command": "cd ./cmd/sdk-server && go build && ./sdk-server",
-			"promptOnClose": false,
+			"command": "go build",
+			"options": {
+				"cwd": "${workspaceFolder}/cmd/sdk-server"
+			},
 			"problemMatcher": [
 				"$go"
 			]
+		},
+		{
+			"dependsOn": "build sdk-server",
+			"label": "run sdk-server",
+			"type": "shell",
+			"command": "./sdk-server -dd",
+			"promptOnClose": false,
+			"options": {
+				"cwd": "${workspaceFolder}/cmd/sdk-server"
+			},
+			"problemMatcher": []
 		}
 	]
 }

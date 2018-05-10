@@ -2,12 +2,14 @@ package sdk
 
 import "context"
 
-// Segment is a copy of api/internal/common.Segment
+// Segment is a normal user segment
 type Segment struct {
+	// Name is required for Create
+	Name string `json:"name,omitempty"`
+
 	SegmentID              string   `json:"segmentID,omitempty"`
 	AdvertiserID           string   `json:"advertiserID,omitempty"`
 	Active                 bool     `json:"active,omitempty"`
-	Name                   string   `json:"name,omitempty"`
 	TargetConsumers        string   `json:"targetConsumers,omitempty"`
 	MinimumPageViews       int      `json:"minimumPageViews,omitempty"`
 	VisitedSiteAtLeast     int      `json:"visitedSiteAtLeast,omitempty"`
