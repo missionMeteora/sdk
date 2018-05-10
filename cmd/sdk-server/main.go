@@ -54,6 +54,7 @@ func main() {
 		ch.g.Use(apiserv.LogRequests(*debug > 1))
 	}
 
+	ch.g.GET("/userID", ch.GetUserID)
 	ch.g.GET("/adsReport/:uid/:start/:end", ch.GetAdsReport)
 	ch.g.GET("/campaignReport/:uid/:cid/:start/:end", ch.GetCampaignReport)
 
@@ -135,6 +136,20 @@ func (ch *clientHandler) getClient(ctx *apiserv.Context) (c *sdk.Client) {
 		c = nil
 	}
 	return
+}
+
+func (ch *clientHandler) GetUserID(ctx *apiserv.Context) apiserv.Response {
+	c := ch.getClient(ctx)
+	if ctx.Done() {
+		return nil
+	}
+
+	data, err := c.GetUserID(context.Background())
+	if err != nil {
+		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
+	}
+
+	return apiserv.NewJSONResponse(data)
 }
 
 func (ch *clientHandler) GetCampaignReport(ctx *apiserv.Context) apiserv.Response {

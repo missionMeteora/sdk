@@ -20,6 +20,8 @@
 ### Methods Mapping
 
 ```
+GET /api/v1/userID -> GetUserID
+
 GET /api/v1/campaign/:cid -> GetCampaign
 GET /api/v1/draftCampaign/:cid -> GetDraftCampaign
 GET /api/v1/heatmap/:uid -> GetHeatmap
