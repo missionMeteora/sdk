@@ -81,7 +81,7 @@ func getStartEnd(start, end time.Time) (s, e string, err error) {
 	if start == AllTime {
 		s = time.Now().UTC().AddDate(-1, 0, 0).Format("2006-01-02")
 	} else {
-		s = start.UTC().AddDate(-1, 0, 0).Format("2006-01-02")
+		s = start.UTC().Format("2006-01-02")
 	}
 
 	if end == AllTime {
