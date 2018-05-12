@@ -38,9 +38,10 @@ type ImpClick struct {
 
 // AdReport represents a basic ad report
 type AdReport struct {
-	ID     string `json:"id"`
-	Imp    int64  `json:"imp,omitempty"`
-	Clicks int64  `json:"clicks,omitempty"`
+	ID     string  `json:"id"`
+	Imp    int64   `json:"imp,omitempty"`
+	Clicks int64   `json:"clicks,omitempty"`
+	Spent  float64 `json:"spent,omitempty"`
 }
 
 // Click is a click action
