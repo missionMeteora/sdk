@@ -17,7 +17,7 @@ type CampaignReport struct {
 	Spent   float64             `json:"spent,omitempty"`
 	Period  uint32              `json:"reportingPeriod,omitempty"`
 	Domains map[string]ImpClick `json:"domains,omitempty"`
-	Visits  []Visit             `json:"visit,omtiempty"` // est visits please see terms
+	Visits  []Visit             `json:"visits,omtiempty"` // est visits please see terms
 }
 
 /// Visit is a single visit details
