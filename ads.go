@@ -79,7 +79,7 @@ func (c *Client) CreateAd(ctx context.Context, uid string, req *CreateAdRequest)
 			err = fmt.Errorf("unexpected base64 data, the image data must start with: `data:%s;base64,`", mt)
 			return
 		}
-		pipeObj["data"] = strings.NewReader(img)
+		pipeObj["data"] = io.MultiReader(bytes.NewReader(quoteBytes), strings.NewReader(img), bytes.NewReader(quoteBytes))
 	}
 
 	imageReq := ptk.PipeJSONObject(pipeObj)
@@ -250,7 +250,7 @@ func (r *CreateAdRequest) validate() error {
 func AllowedAdRectsString() string {
 	out := make([]string, 0, len(allowedAdRects))
 	for _, rect := range allowedAdRects {
-		out = append(out, fmt.Sprintf("%dx%x", rect.Width, rect.Height))
+		out = append(out, fmt.Sprintf("%dx%d", rect.Width, rect.Height))
 	}
 	return strings.Join(out, ",")
 }
