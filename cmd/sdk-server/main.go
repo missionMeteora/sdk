@@ -55,6 +55,7 @@ func main() {
 	}
 
 	ch.g.GET("/userID", ch.GetUserID)
+	ch.g.POST("/upgradeCampaign/:uid/:draftCID", ch.UpgradeCampaign)
 	ch.g.GET("/adsReport/:uid/:start/:end", ch.GetAdsReport)
 	ch.g.GET("/campaignReport/:uid/:cid/:start/:end", ch.GetCampaignReport)
 
@@ -247,4 +248,18 @@ func (ch *clientHandler) checkReportCache(ctx *apiserv.Context, c *sdk.Client, c
 	}
 
 	return
+}
+
+func (ch *clientHandler) UpgradeCampaign(ctx *apiserv.Context) apiserv.Response { // method:POST
+	c := ch.getClient(ctx)
+	if ctx.Done() {
+		return nil
+	}
+
+	data, err := c.UpgradeCampaign(context.Background(), ctx.Param("uid"), ctx.Param("draftCID"))
+	if err != nil {
+		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
+	}
+
+	return apiserv.NewJSONResponse(data)
 }

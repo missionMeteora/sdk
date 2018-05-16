@@ -1,6 +1,7 @@
 package sdk_test
 
 import (
+	"strings"
 	"testing"
 
 	TU "github.com/PathDNA/testutils"
@@ -34,12 +35,15 @@ func TestCampaigns(t *testing.T) {
 	TU.FatalIf(t, err)
 
 	var (
-		agID, segID, psegID, cmpID string
+		agID, segID, psegID, cmpID, fullCmpID string
 
 		ad *sdk.Ad
 	)
 
 	defer func() {
+		if fullCmpID != "" {
+			TU.FailIf(t, c2.DeleteCampaign(ctx, fullCmpID))
+		}
 		if cmpID != "" {
 			TU.FailIf(t, c2.DeleteDraftCampaign(ctx, cmpID))
 		}
@@ -77,7 +81,14 @@ func TestCampaigns(t *testing.T) {
 		Name:     "SDK Test Campaign",
 		Segments: []string{segID, psegID},
 		Adgroups: []string{agID},
+		Budget:   10,
 	})
+	TU.FatalIf(t, err)
+
+	fullCmpID, err = c2.UpgradeCampaign(ctx, defaultUID, cmpID)
+	if err != nil && strings.Contains(err.Error(), "Your card number is incorrect") { // expected
+		err = nil
+	}
 	TU.FatalIf(t, err)
 }
 
