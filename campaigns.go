@@ -373,3 +373,19 @@ func validateCampaign(c *Campaign) (err error) {
 
 	return nil
 }
+
+// UpgradeCampaign will attempt to upgrade a draft campaign to a full campaign and returning new campaign id.
+// note that it may return an error and a campaign id if deleting the draft campaign fails after creating the full campaign.
+func (c *Client) UpgradeCampaign(ctx context.Context, uid, draftCampaignID string) (cid string, err error) {
+	var cmp *Campaign
+
+	if cmp, err = c.GetDraftCampaign(ctx, draftCampaignID); err != nil {
+		return
+	}
+
+	if cid, err = c.CreateCampaign(ctx, uid, cmp); err == nil {
+		err = c.DeleteDraftCampaign(ctx, draftCampaignID)
+	}
+
+	return
+}

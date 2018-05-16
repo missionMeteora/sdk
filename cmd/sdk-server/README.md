@@ -35,11 +35,13 @@ GET /api/v1/draftCampaigns/:uid -> ListDraftCampaigns
 GET /api/v1/proximitySegments/:uid -> ListProximitySegments
 GET /api/v1/segments/:uid -> ListSegments
 
+POST /api/v1/campaign/:uid -> CreateCampaign
+POST /api/v1/draftCampaign/:uid -> CreateDraftCampaign
+POST /api/v1/upgradeCampaign/:uid/:draftCID -> UpgradeCampaign
+
 POST /api/v1/ad/:uid -> CreateAd
 POST /api/v1/adGroup/:uid -> CreateAdGroup
 POST /api/v1/advertiser -> CreateAdvertiser
-POST /api/v1/campaign/:uid -> CreateCampaign
-POST /api/v1/draftCampaign/:uid -> CreateDraftCampaign
 POST /api/v1/fullCampaign/:uid -> CreateFullCampaign
 POST /api/v1/proximitySegment/:uid -> CreateProximitySegment
 POST /api/v1/segment/:uid -> CreateSegment
