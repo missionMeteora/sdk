@@ -1,6 +1,7 @@
 package sdk_test
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -95,17 +96,19 @@ func TestCampaigns(t *testing.T) {
 func TestCreateFullCampaign(t *testing.T) {
 	c := sdk.NewWithAddr(localAPI, adminKey)
 
-	c2, err := c.AsUser(ctx, "3") // meteora user
-	TU.FatalIf(t, err)
-
 	req := &sdk.CreateFullCampaignRequest{
 		Campaign: &sdk.Campaign{
-			Name:   "SDK Test Full Campaign",
+			Name: "SDK Test Full Campaign",
+			Apps: map[string]*json.RawMessage{
+				"advancedBidding": sdk.RawMarshal(sdk.AppAdvBidding{
+					Status: true, BaseCPM: 2, MaxCPM: 5,
+				}),
+				"searchRetargeting": sdk.RawMarshal(sdk.AppSearchRetargeting{
+					Status: true,
+					List:   []string{"nike shoes", "adidas", "shiny shoes"},
+				}),
+			},
 			Budget: 50,
-		},
-
-		CampaignApps: []sdk.App{
-			&sdk.AppAdvBidding{BaseCPM: 2, MaxCPM: 5},
 		},
 
 		Ads: []*sdk.CreateAdRequest{
@@ -129,6 +132,11 @@ func TestCreateFullCampaign(t *testing.T) {
 
 		IsDraft: true,
 	}
+
+	t.Logf("%s", *sdk.RawMarshal(req))
+
+	c2, err := c.AsUser(ctx, "3") // meteora user
+	TU.FatalIf(t, err)
 
 	cmp, err := c2.CreateFullCampaign(ctx, defaultUID, req)
 	TU.FatalIf(t, err)
