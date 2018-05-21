@@ -26,8 +26,6 @@ type Campaign struct {
 	Budget    float64 `json:"budget"`
 	ImpBudget uint32  `json:"impBudget"`
 
-	OptBucket uint8 `json:"optBucket"`
-
 	Created   int64 `json:"created"`
 	Scheduled bool  `json:"scheduled"`
 	Start     int64 `json:"start"`
@@ -39,6 +37,30 @@ type Campaign struct {
 	Apps map[string]*json.RawMessage `json:"apps,omitempty"`
 
 	Searches []string `json:"searches,omitempty"`
+}
+
+// can't specify methods on aliased types
+func (c *Campaign) validateCampaign() (err error) {
+	if c == nil {
+		return ErrCampaignIsNil
+	}
+	if len(c.Name) == 0 {
+		return ErrInvalidName
+	}
+
+	if c.Budget < CampaignMinimumBudget && c.ImpBudget == 0 {
+		return ErrInvalidBudget
+	}
+
+	if c.ImpBudget > CampaignMaximumBudget {
+		return ErrInvalidImpBudget
+	}
+
+	if c.Scheduled && c.Start >= c.End {
+		return ErrInvalidSchedule
+	}
+
+	return nil
 }
 
 // CreateCampaign will create a campaign for a given user ID
@@ -69,7 +91,7 @@ func (c *Client) createCampaign(ctx context.Context, uid string, cmp *Campaign, 
 
 	for _, app := range DefaultApps {
 		if _, ok := cmp.Apps[app.Name()]; !ok {
-			SetApp(cmp, app.Name(), app)
+			SetApp(cmp, app)
 		}
 	}
 
@@ -223,7 +245,7 @@ func (req *CreateFullCampaignRequest) validate() (err error) {
 		return ErrRequestIsNil
 	}
 
-	if err = validateCampaign(req.Campaign); err != nil {
+	if err = req.Campaign.validateCampaign(); err != nil {
 		return
 	}
 
@@ -302,8 +324,11 @@ func (c *Client) CreateFullCampaign(ctx context.Context, uid string, req *Create
 	}()
 
 	cmp = req.Campaign
-
 	cmp.OwnerID = uid
+
+	for _, app := range req.CampaignApps {
+		SetApp(cmp, app)
+	}
 
 	var agID string
 	if agID, err = c.CreateAdGroup(ctx, uid, cmp.Name); err != nil {
@@ -339,39 +364,11 @@ func (c *Client) CreateFullCampaign(ctx context.Context, uid string, req *Create
 		cmp.Segments = append(cmp.Segments, segID)
 	}
 
-	for _, app := range req.CampaignApps {
-		SetApp(cmp, app.Name(), app)
-	}
-
 	if cmp.ID, err = c.createCampaign(ctx, uid, cmp, req.IsDraft); err != nil {
 		return
 	}
 
 	return cmp, nil
-}
-
-// can't specify methods on aliased types
-func validateCampaign(c *Campaign) (err error) {
-	if c == nil {
-		return ErrCampaignIsNil
-	}
-	if len(c.Name) == 0 {
-		return ErrInvalidName
-	}
-
-	if c.Budget < CampaignMinimumBudget && c.ImpBudget == 0 {
-		return ErrInvalidBudget
-	}
-
-	if c.ImpBudget > CampaignMaximumBudget {
-		return ErrInvalidImpBudget
-	}
-
-	if c.Scheduled && c.Start >= c.End {
-		return ErrInvalidSchedule
-	}
-
-	return nil
 }
 
 // UpgradeCampaign will attempt to upgrade a draft campaign to a full campaign and returning new campaign id.

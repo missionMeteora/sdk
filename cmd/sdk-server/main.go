@@ -55,6 +55,7 @@ func main() {
 	}
 
 	ch.g.GET("/userID", ch.GetUserID)
+	ch.g.GET("/listApps", ch.listApps)
 	ch.g.POST("/upgradeCampaign/:uid/:draftCID", ch.UpgradeCampaign)
 	ch.g.GET("/adsReport/:uid/:start/:end", ch.GetAdsReport)
 	ch.g.GET("/campaignReport/:uid/:cid/:start/:end", ch.GetCampaignReport)
@@ -262,4 +263,23 @@ func (ch *clientHandler) UpgradeCampaign(ctx *apiserv.Context) apiserv.Response 
 	}
 
 	return apiserv.NewJSONResponse(data)
+}
+
+func (ch *clientHandler) listApps(ctx *apiserv.Context) apiserv.Response {
+	ch.getClient(ctx)
+	if ctx.Done() {
+		return nil
+	}
+
+	type appWithName struct {
+		Name string  `json:"name"`
+		App  sdk.App `json:"app"`
+	}
+	var allApps []appWithName
+	for _, app := range sdk.AllApps {
+		allApps = append(allApps, appWithName{app.Name(), app})
+	}
+
+	ctx.JSON(200, true, allApps)
+	return nil
 }

@@ -21,9 +21,11 @@
 
 ```
 GET /api/v1/userID -> GetUserID
+GET /api/v1/listApps -> listApps
 
-GET /api/v1/campaign/:cid -> GetCampaign
+GET /api/v1/campaign/:cid -> GetCampaignz
 GET /api/v1/draftCampaign/:cid -> GetDraftCampaign
+
 GET /api/v1/heatmap/:uid -> GetHeatmap
 GET /api/v1/adGroups/:uid -> ListAdGroups
 GET /api/v1/ads/:uid -> ListAds
@@ -37,12 +39,13 @@ GET /api/v1/segments/:uid -> ListSegments
 
 POST /api/v1/campaign/:uid -> CreateCampaign
 POST /api/v1/draftCampaign/:uid -> CreateDraftCampaign
+POST /api/v1/fullCampaign/:uid -> CreateFullCampaign
 POST /api/v1/upgradeCampaign/:uid/:draftCID -> UpgradeCampaign
+
 
 POST /api/v1/ad/:uid -> CreateAd
 POST /api/v1/adGroup/:uid -> CreateAdGroup
 POST /api/v1/advertiser -> CreateAdvertiser
-POST /api/v1/fullCampaign/:uid -> CreateFullCampaign
 POST /api/v1/proximitySegment/:uid -> CreateProximitySegment
 POST /api/v1/segment/:uid -> CreateSegment
 
@@ -125,6 +128,78 @@ For any POST/GET requests that uses a struct, you need to match the required str
 	"data": "adgroup-id",
 	"code":200,
 	"success":true
+}
+
+
+#### [CreateFullCampaign](https://godoc.org/github.com/missionMeteora/sdk#Client.CreateFullCampaign)
+
+```
+
+{
+	"campaign": {
+		"active": false,
+		"name": "SDK Test Full Campaign",
+		"budget": 50,
+		"impBudget": 0,
+		"created": 0,
+		"scheduled": false,
+		"start": 0,
+		"end": 0,
+		"apps": {
+			"advancedBidding": {
+				"status": true,
+				"baseCpm": 2,
+				"maxCpm": 5
+			},
+			"searchRetargeting": {
+				"status": true,
+				"list": ["nike shoes", "adidas", "shiny shoes"]
+			}
+		}
+	},
+
+	"ads": [
+		{
+			"name": "sdkTestCampaign-1.png",
+			"width": 300,
+			"height": 250,
+			"landingURL": "https://test.com",
+			"adImage": "data:....,base64,"
+		},
+		{
+			"name": "sdkTestCampaign-2.png",
+			"width": 300,
+			"height": 250,
+			"landingURL": "https://test.com",
+			"adImage": "data:....,base64,"
+		}
+	],
+
+	"segments": [
+		{
+			"name": "Full Segment"
+		}
+	],
+
+	"proximitySegment": [
+		{
+			"name": "Full Proximity Segment",
+			"locations": [
+				{
+					"id": "",
+					"label": "Starbucks",
+					"type": "",
+					"center": {
+						"lat": 32.8826822,
+						"lng": -97.39539739999998
+					},
+					"radius": 500
+				}
+			]
+		}
+	],
+
+	"isDraft": true
 }
 
 ```
