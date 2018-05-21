@@ -130,11 +130,11 @@ For any POST/GET requests that uses a struct, you need to match the required str
 	"success":true
 }
 
+```
 
 #### [CreateFullCampaign](https://godoc.org/github.com/missionMeteora/sdk#Client.CreateFullCampaign)
 
 ```
-
 {
 	"campaign": {
 		"active": false,
