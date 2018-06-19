@@ -52,7 +52,7 @@ func (c *Campaign) validateCampaign() (err error) {
 		return ErrInvalidBudget
 	}
 
-	if c.ImpBudget > CampaignMaximumBudget {
+	if c.ImpBudget > CampaignMaximumImpBudget {
 		return ErrInvalidImpBudget
 	}
 
