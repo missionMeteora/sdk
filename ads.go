@@ -38,6 +38,9 @@ type Ad struct {
 
 	ImpTracker   string `json:"impTrack,omitempty"`
 	ClickTracker string `json:"clickTrack,omitempty"`
+
+	// Third party
+	ThirdPartyCode string `json:"thirdPartyCode,omitempty"`
 }
 
 // CreateAd will create an Advertisement for a given user ID
@@ -89,10 +92,13 @@ func (c *Client) CreateAd(ctx context.Context, uid string, req *CreateAdRequest)
 		Location string `json:"location"`
 	}
 
-	if err = c.rawPost(ctx, "images/"+uid, imageReq, &resp); err != nil {
-		return
+	if req.ThirdPartyCode == "" {
+		if err = c.rawPost(ctx, "images/"+uid, imageReq, &resp); err != nil {
+			return
+		}
 	}
 
+	// resp.ID/loc will be empty if this is a 3rd party ad, which is fine
 	ad = req.toAd(resp.ID, resp.Location)
 
 	if err = c.rawPost(ctx, "ads/"+uid+"?incGroup=true", ad, &resp); err != nil {
@@ -201,13 +207,22 @@ type CreateAdRequest struct {
 	Encoded      bool   `json:"encoded,omitempty"`
 
 	AdImage interface{} `json:"adImage,omitempty"`
+
+	// Third party
+	ThirdPartyCode string `json:"thirdPartyCode,omitempty"`
 }
 
 func (r *CreateAdRequest) toAd(iid, iloc string) *Ad {
+	typ := "banner"
+
+	if r.ThirdPartyCode != "" {
+		typ = "thirdParty"
+	}
+
 	return &Ad{
 		Name:    r.Name,
 		GroupID: r.GroupID,
-		AdType:  "banner",
+		AdType:  typ,
 		Active:  true,
 
 		Width:  r.Width,
@@ -220,6 +235,8 @@ func (r *CreateAdRequest) toAd(iid, iloc string) *Ad {
 		LandingURL:   r.LandingURL,
 		ImpTracker:   r.ImpTracker,
 		ClickTracker: r.ClickTracker,
+
+		ThirdPartyCode: r.ThirdPartyCode,
 	}
 }
 
@@ -241,9 +258,10 @@ func (r *CreateAdRequest) validate() error {
 		return ErrInvalidAdSize
 	}
 
-	if r.AdImage == nil {
+	if r.AdImage == nil && r.ThirdPartyCode == "" {
 		return ErrMissingAdImage
 	}
+
 	return nil
 }
 
