@@ -48,7 +48,7 @@ var (
 
 	ErrInvalidLanding = errors.New("invalid landing url")
 
-	ErrMissingAdImage = errors.New("missing ad image")
+	ErrMissingAdImage = errors.New("missing ad image or third party code")
 
 	ErrMissingAds = errors.New("must pass at least one ad")
 
