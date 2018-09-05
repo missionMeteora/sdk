@@ -58,8 +58,10 @@ func (c *Client) CreateAd(ctx context.Context, uid string, req *CreateAdRequest)
 	switch mt {
 	case "image/jpeg", "image/gif", "image/png":
 	default:
-		err = fmt.Errorf("invalid image type from filename (%s): %s", req.Name, mt)
-		return
+		if req.ThirdPartyCode == "" {
+			err = fmt.Errorf("invalid image type from filename (%s): %s", req.Name, mt)
+			return
+		}
 	}
 
 	pipeObj := ptk.M{
@@ -85,14 +87,13 @@ func (c *Client) CreateAd(ctx context.Context, uid string, req *CreateAdRequest)
 		pipeObj["data"] = io.MultiReader(bytes.NewReader(quoteBytes), strings.NewReader(img), bytes.NewReader(quoteBytes))
 	}
 
-	imageReq := ptk.PipeJSONObject(pipeObj)
-
 	var resp struct {
 		ID       string `json:"id"`
 		Location string `json:"location"`
 	}
 
-	if req.ThirdPartyCode == "" {
+	if req.ThirdPartyCode == "" && pipeObj["data"] != nil {
+		imageReq := ptk.PipeJSONObject(pipeObj)
 		if err = c.rawPost(ctx, "images/"+uid, imageReq, &resp); err != nil {
 			return
 		}
