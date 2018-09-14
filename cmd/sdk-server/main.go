@@ -275,6 +275,7 @@ func (ch *clientHandler) listApps(ctx *apiserv.Context) apiserv.Response {
 		Name string  `json:"name"`
 		App  sdk.App `json:"app"`
 	}
+
 	var allApps []appWithName
 	for _, app := range sdk.AllApps {
 		allApps = append(allApps, appWithName{app.Name(), app})
