@@ -14,6 +14,7 @@ var AllApps = []App{
 	AppSearchRetargeting{},
 	AppDomainTargeting{},
 	AppGeography{},
+	UUIDTargeting{},
 }
 
 type App interface {
@@ -65,6 +66,15 @@ type AppGeography struct {
 
 func (AppGeography) Name() string { return "geography" }
 func (AppGeography) app()         {}
+
+type UUIDTargeting struct {
+	Whitelist []string `json:"whitelist"`
+	Blacklist []string `json:"blacklist"`
+	Status    bool     `json:"status"`
+}
+
+func (UUIDTargeting) Name() string { return "uuidTargeting" }
+func (UUIDTargeting) app()         {}
 
 // SetApp is a little helper func to add apps to campaigns.
 func SetApp(cmp *Campaign, app App) {
