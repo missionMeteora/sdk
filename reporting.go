@@ -5,10 +5,8 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
-	"fmt"
 	"io"
 	"log"
-	"os"
 	"path/filepath"
 	"sync"
 	"time"
@@ -237,9 +235,8 @@ func (c *Client) Receipts(ctx context.Context, sc *ssync.Client, date time.Time,
 		sem      = ptk.NewSem(10)
 		m        = []byte(getMatchString(uid, cid))
 		mux      sync.Mutex
-		buf      = bytes.NewBuffer(make([]byte, 0))
+		buf      = bytes.NewBuffer(make([]byte, 0, bufSize))
 		first    = true
-		count    = 0
 	)
 
 	defer sem.Close()
@@ -250,12 +247,12 @@ func (c *Client) Receipts(ctx context.Context, sc *ssync.Client, date time.Time,
 
 	process := func(i int, f *ssync.FileInfo) {
 		if err := sc.StreamFile(ctx, filepath.Join(basePath, f.Path), func(rd io.Reader) error {
-			gz, err := gzip.NewReader(rd)
+			gz, err := gzip.NewReader(bufio.NewReaderSize(rd, bufSize/2))
 			if err != nil {
 				return err
 			}
 			defer gz.Close()
-			br := bufio.NewScanner(bufio.NewReaderSize(gz, bufSize))
+			br := bufio.NewScanner(gz)
 
 			for br.Scan() {
 				val := br.Bytes()
@@ -271,8 +268,6 @@ func (c *Client) Receipts(ctx context.Context, sc *ssync.Client, date time.Time,
 					buf.WriteByte(',')
 				}
 				buf.Write(val[tsAndSepLen:])
-				count++
-				fmt.Fprint(os.Stderr, i)
 				mux.Unlock()
 			}
 			return nil
