@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/PathDNA/ssync"
+
 	"github.com/PathDNA/ptk/cache"
 	"github.com/missionMeteora/apiserv"
 	"github.com/missionMeteora/sdk"
@@ -27,7 +29,8 @@ var (
 
 	debug = kingpin.Flag("debug", "log requests").Short('d').Counter()
 
-	addr = kingpin.Flag("addr", "listen addr").Default(":8081").String()
+	addr      = kingpin.Flag("addr", "listen addr").Default(":8081").String()
+	ssyncAddr = kingpin.Flag("ssyncAddr", "ssync addr").String()
 
 	letsEnc = kingpin.Flag("letsencrypt", "run production letsencrypt, addr must be set to a valid hostname").Short('s').Bool()
 
@@ -43,11 +46,16 @@ func main() {
 	kingpin.Version(version).VersionFlag.Short('V')
 	kingpin.Parse()
 
-	s := apiserv.New()
+	sc, err := ssync.NewClient("", "bank", *ssyncAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	s := apiserv.New()
 	ch := &clientHandler{
-		g: s.Group(*apiPrefix),
-		c: cache.NewMemCache(time.Minute * 15),
+		g:  s.Group(*apiPrefix),
+		sc: sc,
+		c:  cache.NewMemCache(time.Minute * 15),
 	}
 
 	if *debug > 0 {
@@ -59,6 +67,8 @@ func main() {
 	ch.g.POST("/upgradeCampaign/:uid/:draftCID", ch.UpgradeCampaign)
 	ch.g.GET("/adsReport/:uid/:start/:end", ch.GetAdsReport)
 	ch.g.GET("/campaignReport/:uid/:cid/:start/:end", ch.GetCampaignReport)
+	ch.g.GET("/receipts/:uid/:date", ch.GetReceipts)
+	ch.g.GET("/receipts/:uid/:cid/:date", ch.GetReceipts)
 
 	ch.g.GET("/ping", func(*apiserv.Context) apiserv.Response { return pongResp })
 	ch.g.GET("/version", func(*apiserv.Context) apiserv.Response { return verResp })
@@ -88,8 +98,9 @@ func main() {
 type clientHandler struct {
 	addr string
 
-	c *cache.MemCache
-	g apiserv.Group
+	sc *ssync.Client
+	c  *cache.MemCache
+	g  apiserv.Group
 }
 
 func (ch *clientHandler) getClient(ctx *apiserv.Context) (c *sdk.Client) {
@@ -283,4 +294,26 @@ func (ch *clientHandler) listApps(ctx *apiserv.Context) apiserv.Response {
 
 	ctx.JSON(200, true, allApps)
 	return nil
+}
+
+func (ch *clientHandler) GetReceipts(ctx *apiserv.Context) apiserv.Response {
+	var (
+		c = ch.getClient(ctx)
+
+		uid  = ctx.Param("uid")
+		cid  = ctx.Param("cid")
+		date = sdk.DateToTime(ctx.Param("date"))
+	)
+
+	if ctx.Done() {
+		return nil
+	}
+
+	receipts, err := c.Receipts(ctx.Req.Context(), ch.sc, date, uid, cid)
+	if err != nil {
+		log.Println(err)
+		return apiserv.NewJSONErrorResponse(500)
+	}
+
+	return apiserv.PlainResponse(apiserv.MimeJSON, receipts)
 }
