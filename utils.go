@@ -119,3 +119,12 @@ func DateToTime(date string) time.Time {
 
 	return time.Time{}
 }
+
+func isNumber(s string) bool {
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}

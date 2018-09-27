@@ -8,9 +8,12 @@ import (
 	"image/png"
 	"io"
 	"log"
+	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/PathDNA/ssync"
 
 	TU "github.com/PathDNA/testutils"
 	"github.com/missionMeteora/sdk"
@@ -214,6 +217,15 @@ func TestHeatmaps(t *testing.T) {
 	if len(hm.AdsList) == 0 {
 		t.Fatalf("invalid response: %+v", hm)
 	}
+}
+
+func TestSsync(t *testing.T) {
+	c := sdk.NewWithAddr(localAPI, adminKey)
+	sc, err := ssync.NewClient("", "bank", os.Getenv("SSYNC_ADDR"))
+	TU.FatalIf(t, err)
+	d := time.Date(2018, 9, 27, 0, 0, 0, 0, time.UTC)
+	_, err = c.Receipts(ctx, sc, d, "2720", "12591")
+	TU.FatalIf(t, err)
 }
 
 func dummyProxSeg(name string) *sdk.ProximitySegment {
