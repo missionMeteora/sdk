@@ -1,8 +1,19 @@
 package sdk
 
 import (
+	"bufio"
+	"bytes"
+	"compress/gzip"
 	"context"
+	"io"
+	"log"
+	"path/filepath"
+	"sync"
 	"time"
+
+	"github.com/PathDNA/ptk"
+
+	"github.com/PathDNA/ssync"
 )
 
 var (
@@ -178,4 +189,111 @@ func (c *Client) GetHeatmap(ctx context.Context, uid string) (out *Heatmap, err 
 	out.fillIDs()
 
 	return
+}
+
+type Receipt struct {
+	CID   string `json:"id"`              // Campaign id
+	AdvID string `json:"advertiserId"`    // Advertiser id
+	SegID string `json:"segID,omitempty"` // Segment id
+	ImpID string `json:"impid"`           // Meteora impression id
+	AdID  string `json:"adId"`            // Ad id
+	UUID  string `json:"uuid"`            // User id for ad viewer
+
+	Timestamp int64   `json:"timestamp"`         // Timestamp of win
+	Amount    float64 `json:"amount,omitempty"`  // Cost of the impression (true value) [Deprecated]
+	Credits   int64   `json:"credits,omitempty"` // Cost of the impression (true value * 1,000,000)
+
+	Domain    string `json:"domain,omitempty"`  // Domain the ad was served on
+	Services  string `json:"usedSvc,omitempty"` // Comma separated list of services used for the impression
+	Inventory string `json:"invt,omitempty"`    // Platform used to view impression (IE desktop, mobile, mobile app)
+
+	ExID    string `json:"svc"`              // Servicer (exchange) id
+	ExImpID string `json:"eid,omitempty"`    // Exchange-provided impression id
+	ExInfo  string `json:"exInfo,omitempty"` // Miscellaneous exchange information
+
+	PxID string `json:"pxID,omitempty"` // Proximity target id
+}
+
+func (c *Client) Receipts(ctx context.Context, sc *ssync.Client, date time.Time, uid, cid string) (out []byte, err error) {
+	const (
+		tsAndSepLen = len("1538006719@")
+		bufSize     = 1 << 17 // 128kb
+	)
+
+	if uid == "" || !isNumber(uid) {
+		err = ErrMissingUID
+	}
+
+	if cid != "" && !isNumber(cid) {
+		err = ErrCampaignIsNil
+		return
+	}
+
+	var (
+		files    []*ssync.FileInfo
+		basePath = filepath.Join("receipts", date.Format("2006/01/02"))
+		sem      = ptk.NewSem(10)
+		m        = []byte(getMatchString(uid, cid))
+		mux      sync.Mutex
+		buf      = bytes.NewBuffer(make([]byte, 0, bufSize))
+		first    = true
+	)
+
+	defer sem.Close()
+
+	if files, err = sc.ListFiles(ctx, basePath); err != nil {
+		return
+	}
+
+	process := func(i int, f *ssync.FileInfo) {
+		if err := sc.StreamFile(ctx, filepath.Join(basePath, f.Path), func(rd io.Reader) error {
+			gz, err := gzip.NewReader(bufio.NewReaderSize(rd, bufSize/2))
+			if err != nil {
+				return err
+			}
+			defer gz.Close()
+			br := bufio.NewScanner(gz)
+
+			for br.Scan() {
+				val := br.Bytes()
+				// this is faster than decoding each record from json
+				if !bytes.Contains(val, m) {
+					continue
+				}
+
+				mux.Lock()
+				if first {
+					first = false
+				} else {
+					buf.WriteByte(',')
+				}
+				buf.Write(val[tsAndSepLen:])
+				mux.Unlock()
+			}
+			return nil
+		}); err != nil {
+			log.Printf("error streaming file (%s/%s): %v", basePath, f.Path, err)
+		}
+
+		sem.Done()
+	}
+
+	buf.WriteByte('[')
+	for i, f := range files {
+		sem.Add(1)
+		i, f := i, f
+		go process(i, f)
+	}
+
+	sem.Wait()
+	buf.WriteByte(']')
+
+	return buf.Bytes(), nil
+}
+
+func getMatchString(uid, cid string) string {
+	if cid == "" {
+		return `"advertiserId":"` + uid + `"`
+	}
+	return `"id":"` + cid + `","advertiserId":"` + uid + `"`
 }
