@@ -95,7 +95,8 @@ func getStartEnd(start, end time.Time) (s, e string, err error) {
 }
 
 func MidnightToMidnight(t time.Time) (start, end time.Time) {
-	start = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	year, month, day := t.Date()
+	start = time.Date(year, month, day, 0, 0, 0, 0, t.Location())
 	end = start.AddDate(0, 0, 1).Add(-time.Second)
 	return
 }
