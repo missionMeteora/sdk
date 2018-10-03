@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"strconv"
 	"time"
 )
@@ -139,10 +140,12 @@ func isNumber(s string) bool {
 
 func verifyUserCampaign(ctx context.Context, c *Client, uid, cid string) bool {
 	if cid != "" && cid != "-1" {
-		cmps, _ := c.ListCampaigns(ctx, uid)
+		cmps, err := c.ListCampaigns(ctx, uid)
+		log.Println(uid, cid, cmps[cid], err)
 		return cmps[cid] != nil
 	}
 
 	_, err := c.AsUser(ctx, uid)
+	log.Println(err)
 	return err == nil
 }

@@ -332,7 +332,7 @@ func (c *Client) Clicks(ctx context.Context, clicksAddr string, date time.Time, 
 	var (
 		start, end = MidnightToMidnight(date.UTC())
 
-		u = fmt.Sprintf(clicksAddr, uid, cid, start.Unix(), end.Unix())
+		u = fmt.Sprintf(clicksAddr+"/%s/%s/%d/%d", uid, cid, start.Unix(), end.Unix())
 	)
 
 	err = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
@@ -367,7 +367,7 @@ func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, 
 	var (
 		start, end = MidnightToMidnight(date.UTC())
 
-		u = fmt.Sprintf(visitsAddr, cid, start.Unix(), end.Unix())
+		u = fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cid, start.Unix(), end.Unix())
 	)
 
 	err = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
