@@ -147,7 +147,8 @@ func verifyUserCampaign(ctx context.Context, c *Client, uid, cid string) bool {
 	}
 
 	_, err := c.AsUser(ctx, uid)
-	log.Println(err, uid, cid)
+	cuid, _ := c.GetUserID(ctx)
+	log.Println(err, cuid, uid, cid)
 	return err == nil
 }
 
