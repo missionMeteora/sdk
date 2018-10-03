@@ -307,7 +307,7 @@ func getMatchString(uid, cid string) string {
 	return `"id":"` + cid + `","advertiserId":"` + uid + `"`
 }
 
-var minTime = time.Date(2018, time.October, 3, 0, 0, 0, 0, time.UTC)
+var minTime = time.Date(2018, time.October, 2, 0, 0, 0, 0, time.UTC)
 
 func (c *Client) Clicks(ctx context.Context, clicksAddr string, date time.Time, uid, cid string) (out []byte, err error) {
 	if clicksAddr == "" {
@@ -346,11 +346,6 @@ func (c *Client) Clicks(ctx context.Context, clicksAddr string, date time.Time, 
 func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, uid, cid string) (out []byte, err error) {
 	if visitsAddr == "" {
 		err = ErrMissingVisitsServer
-		return
-	}
-
-	if date.Before(minTime) {
-		out = []byte("[]")
 		return
 	}
 
