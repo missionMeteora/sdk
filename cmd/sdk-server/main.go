@@ -73,6 +73,7 @@ func main() {
 	ch.g.GET("/receipts/:uid/:cid/:date", ch.GetReceipts)
 	ch.g.GET("/clicks/:uid/:date", ch.GetClicks)
 	ch.g.GET("/clicks/:uid/:cid/:date", ch.GetClicks)
+	ch.g.GET("/visits/:uid/:date", ch.GetVisits)
 	ch.g.GET("/visits/:uid/:cid/:date", ch.GetVisits)
 
 	ch.g.GET("/ping", func(*apiserv.Context) apiserv.Response { return pongResp })
