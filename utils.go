@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -93,6 +94,12 @@ func getStartEnd(start, end time.Time) (s, e string, err error) {
 	return
 }
 
+func MidnightToMidnight(t time.Time) (start, end time.Time) {
+	start = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+	end = start.AddDate(0, 0, 1).Add(-time.Second)
+	return
+}
+
 func DateToTime(date string) time.Time {
 	if date == "-1" {
 		return AllTime
@@ -127,4 +134,14 @@ func isNumber(s string) bool {
 		}
 	}
 	return true
+}
+
+func verifyUserCampaign(ctx context.Context, c *Client, uid, cid string) bool {
+	if cid != "" && cid != "-1" {
+		cmps, _ := c.ListCampaigns(ctx, uid)
+		return cmps[cid] != nil
+	}
+
+	_, err := c.AsUser(ctx, uid)
+	return err == nil
 }
