@@ -71,6 +71,8 @@ var (
 	ErrMissingClicksServer = errors.New("missing clicks server")
 
 	ErrMissingVisitsServer = errors.New("missing visits server")
+
+	ErrInternal = errors.New("internal error")
 )
 
 // New returns a new instance with the default server addr and given apiKey.
