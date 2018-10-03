@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,7 +13,6 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
-	"encoding/json"
 
 	"github.com/PathDNA/ptk"
 
@@ -345,15 +345,13 @@ func (c *Client) Clicks(ctx context.Context, clicksAddr string, date time.Time, 
 	return
 }
 
- 
-
 func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, uid, cid string) (out []byte, err error) {
 	if visitsAddr == "" {
 		err = ErrMissingVisitsServer
 		return
 	}
 
-	if cid == "" || cid == "-1" {
+	if cid == "" {
 		cid = "-1"
 	}
 
@@ -362,35 +360,34 @@ func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, 
 		return
 	}
 
-	if cid == "-1" {
-		var visits []Visit
-		cmps, _ := c.ListCampaigns(ctx, uid)
-		for cmpID, _ := range cmps {
-			var (
-				cidVisits []Visit
-				start, end = MidnightToMidnight(date.UTC())
-		
-				u = fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cmpID, start.Unix(), end.Unix())
-			)
-		
-			err = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, &cidVisits)
-			if err != nil {
-				visits = append(visits, cidVisits...)
-			}
-		}
-		out, _ = json.Marshal(visits)
-	} else {
-		var (
-			start, end = MidnightToMidnight(date.UTC())
-	
-			u = fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cid, start.Unix(), end.Unix())
-		)
-	
-		err = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
+	start, end := MidnightToMidnight(date.UTC())
+
+	if cid != "-1" {
+		u := fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cid, start.Unix(), end.Unix())
+
+		err = stripErr(c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
 			out, err = ioutil.ReadAll(r)
 			return err
-		})
+		}))
+		return
 	}
+
+	var (
+		visits  []Visit
+		cmps, _ = c.ListCampaigns(ctx, uid)
+	)
+
+	for cmpID, _ := range cmps {
+		var (
+			cidVisits []Visit
+			u         = fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cmpID, start.Unix(), end.Unix())
+		)
+
+		_ = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, &cidVisits)
+		visits = append(visits, cidVisits...)
+	}
+
+	out, _ = json.Marshal(visits)
 
 	return
 }
