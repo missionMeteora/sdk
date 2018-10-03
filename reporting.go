@@ -5,7 +5,9 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"path/filepath"
 	"sync"
@@ -70,7 +72,7 @@ type Click = struct {
 // GetCampaignReport will generate a report for a given campaign ID and date range
 func (c *Client) GetCampaignReport(ctx context.Context, uid, cid string, start, end time.Time) (cs *CampaignReport, err error) {
 	if uid == "" {
-		err = ErrMissingUID
+		err = ErrBadUID
 		return
 	}
 
@@ -97,7 +99,7 @@ func (c *Client) GetCampaignReport(ctx context.Context, uid, cid string, start, 
 // GetAdsReport will generate a advertisements report for a given user ID and date range
 func (c *Client) GetAdsReport(ctx context.Context, uid string, start, end time.Time) (rp map[string]*AdReport, err error) {
 	if uid == "" {
-		err = ErrMissingUID
+		err = ErrBadUID
 		return
 	}
 
@@ -174,7 +176,7 @@ func (hm *Heatmap) ClicksByAds() (out map[string][]*Click) {
 // GetHeatmap will return the heatmaps belonging to a user ID
 func (c *Client) GetHeatmap(ctx context.Context, uid string) (out *Heatmap, err error) {
 	if uid == "" {
-		err = ErrMissingUID
+		err = ErrBadUID
 		return
 	}
 
@@ -190,6 +192,8 @@ func (c *Client) GetHeatmap(ctx context.Context, uid string) (out *Heatmap, err 
 
 	return
 }
+
+// the following funcs are used internally as the services they use are private
 
 type Receipt struct {
 	CID   string `json:"id"`              // Campaign id
@@ -215,13 +219,18 @@ type Receipt struct {
 }
 
 func (c *Client) Receipts(ctx context.Context, sc *ssync.Client, date time.Time, uid, cid string) (out []byte, err error) {
+	if sc == nil {
+		err = ErrInvalidSSyncClient
+		return
+	}
+
 	const (
 		tsAndSepLen = len("1538006719@")
 		bufSize     = 1 << 17 // 128kb
 	)
 
-	if uid == "" || !isNumber(uid) {
-		err = ErrMissingUID
+	if uid == "" || !isNumber(uid) || !verifyUserCampaign(ctx, c, uid, cid) {
+		err = ErrBadUID
 	}
 
 	if cid != "" && !isNumber(cid) {
@@ -296,4 +305,75 @@ func getMatchString(uid, cid string) string {
 		return `"advertiserId":"` + uid + `"`
 	}
 	return `"id":"` + cid + `","advertiserId":"` + uid + `"`
+}
+
+var minTime = time.Date(2018, time.October, 3, 0, 0, 0, 0, time.UTC)
+
+func (c *Client) Clicks(ctx context.Context, clicksAddr string, date time.Time, uid, cid string) (out []byte, err error) {
+	if clicksAddr == "" {
+		err = ErrMissingClicksServer
+		return
+	}
+
+	if date.Before(minTime) {
+		out = []byte("[]")
+		return
+	}
+
+	if cid == "" {
+		cid = "-1"
+	}
+
+	if !verifyUserCampaign(ctx, c, uid, cid) {
+		err = ErrBadUID
+		return
+	}
+
+	var (
+		start, end = MidnightToMidnight(date.UTC())
+
+		u = fmt.Sprintf(clicksAddr, uid, cid, start.Unix(), end.Unix())
+	)
+
+	err = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
+		out, err = ioutil.ReadAll(r)
+		return err
+	})
+
+	return
+}
+
+func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, uid, cid string) (out []byte, err error) {
+	if visitsAddr == "" {
+		err = ErrMissingVisitsServer
+		return
+	}
+
+	if date.Before(minTime) {
+		out = []byte("[]")
+		return
+	}
+
+	if cid == "" || cid == "-1" {
+		err = ErrMissingCID
+		return
+	}
+
+	if !verifyUserCampaign(ctx, c, uid, cid) {
+		err = ErrBadUID
+		return
+	}
+
+	var (
+		start, end = MidnightToMidnight(date.UTC())
+
+		u = fmt.Sprintf(visitsAddr, cid, start.Unix(), end.Unix())
+	)
+
+	err = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
+		out, err = ioutil.ReadAll(r)
+		return err
+	})
+
+	return
 }

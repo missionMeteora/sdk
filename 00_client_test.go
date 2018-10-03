@@ -78,6 +78,7 @@ func TestAdGroups(t *testing.T) {
 
 	TU.FatalIf(t, c2.DeleteAdGroup(ctx, nag))
 }
+
 func TestAds(t *testing.T) {
 	c := sdk.NewWithAddr(localAPI, adminKey)
 
@@ -146,6 +147,7 @@ func TestSegments(t *testing.T) {
 
 	TU.FatalIf(t, c2.DeleteSegment(ctx, id))
 }
+
 func TestProxSegments(t *testing.T) {
 	c := sdk.NewWithAddr(localAPI, adminKey)
 
@@ -209,6 +211,7 @@ func TestCreateAdvertiser(t *testing.T) {
 
 	t.Logf("new advertiser id: %s", uid)
 }
+
 func TestHeatmaps(t *testing.T) {
 	c := sdk.NewWithAddr(localAPI, adminKey)
 

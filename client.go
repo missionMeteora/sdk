@@ -26,6 +26,8 @@ const (
 var (
 	ErrMissingUID = errors.New("missing user id")
 
+	ErrBadUID = errors.New("bad user id")
+
 	ErrMissingCID = errors.New("missing campaign id")
 
 	ErrMissingSegID = errors.New("missing segment id")
@@ -63,6 +65,12 @@ var (
 	ErrRequestIsNil = errors.New("request is nil")
 
 	ErrCampaignIsNil = errors.New("campaign is nil")
+
+	ErrInvalidSSyncClient = errors.New("invalid ssync client")
+
+	ErrMissingClicksServer = errors.New("missing clicks server")
+
+	ErrMissingVisitsServer = errors.New("missing visits server")
 )
 
 // New returns a new instance with the default server addr and given apiKey.

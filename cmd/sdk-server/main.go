@@ -29,8 +29,10 @@ var (
 
 	debug = kingpin.Flag("debug", "log requests").Short('d').Counter()
 
-	addr      = kingpin.Flag("addr", "listen addr").Default(":8081").String()
-	ssyncAddr = kingpin.Flag("ssyncAddr", "ssync addr").String()
+	addr       = kingpin.Flag("addr", "listen addr").Default(":8081").String()
+	ssyncAddr  = kingpin.Flag("ssyncAddr", "ssync addr").String()
+	clicksAddr = kingpin.Flag("clicksAddr", "clicks addr").String()
+	visitsAddr = kingpin.Flag("visitsAddr", "visits addr").String()
 
 	letsEnc = kingpin.Flag("letsencrypt", "run production letsencrypt, addr must be set to a valid hostname").Short('s').Bool()
 
@@ -69,6 +71,8 @@ func main() {
 	ch.g.GET("/campaignReport/:uid/:cid/:start/:end", ch.GetCampaignReport)
 	ch.g.GET("/receipts/:uid/:date", ch.GetReceipts)
 	ch.g.GET("/receipts/:uid/:cid/:date", ch.GetReceipts)
+	ch.g.GET("/clicks/:uid/:date", ch.GetClicks)
+	ch.g.GET("/clicks/:uid/:cid/:date", ch.GetClicks)
 
 	ch.g.GET("/ping", func(*apiserv.Context) apiserv.Response { return pongResp })
 	ch.g.GET("/version", func(*apiserv.Context) apiserv.Response { return verResp })
@@ -305,15 +309,47 @@ func (ch *clientHandler) GetReceipts(ctx *apiserv.Context) apiserv.Response {
 		date = sdk.DateToTime(ctx.Param("date"))
 	)
 
-	if ctx.Done() {
-		return nil
-	}
-
 	receipts, err := c.Receipts(ctx.Req.Context(), ch.sc, date, uid, cid)
 	if err != nil {
-		log.Println(err)
+		log.Printf("receipts %s/%s/%s:%v", uid, cid, ctx.Param("date"), err)
 		return apiserv.NewJSONErrorResponse(500)
 	}
 
 	return apiserv.PlainResponse(apiserv.MimeJSON, receipts)
+}
+
+func (ch *clientHandler) GetClicks(ctx *apiserv.Context) apiserv.Response {
+	var (
+		c = ch.getClient(ctx)
+
+		uid  = ctx.Param("uid")
+		cid  = ctx.Param("cid")
+		date = sdk.DateToTime(ctx.Param("date"))
+	)
+
+	clicks, err := c.Clicks(ctx.Req.Context(), *clicksAddr, date, uid, cid)
+	if err != nil {
+		log.Printf("clicks %s/%s/%s:%v", uid, cid, ctx.Param("date"), err)
+		return apiserv.NewJSONErrorResponse(500)
+	}
+
+	return apiserv.PlainResponse(apiserv.MimeJSON, clicks)
+}
+
+func (ch *clientHandler) GetVisits(ctx *apiserv.Context) apiserv.Response {
+	var (
+		c = ch.getClient(ctx)
+
+		uid  = ctx.Param("uid")
+		cid  = ctx.Param("cid")
+		date = sdk.DateToTime(ctx.Param("date"))
+	)
+
+	visits, err := c.Clicks(ctx.Req.Context(), *visitsAddr, date, uid, cid)
+	if err != nil {
+		log.Printf("visits %s/%s/%s:%v", uid, cid, ctx.Param("date"), err)
+		return apiserv.NewJSONErrorResponse(500)
+	}
+
+	return apiserv.PlainResponse(apiserv.MimeJSON, visits)
 }
