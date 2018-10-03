@@ -346,7 +346,7 @@ func (ch *clientHandler) GetVisits(ctx *apiserv.Context) apiserv.Response {
 		date = sdk.DateToTime(ctx.Param("date"))
 	)
 
-	visits, err := c.Clicks(ctx.Req.Context(), *visitsAddr, date, uid, cid)
+	visits, err := c.Visits(ctx.Req.Context(), *visitsAddr, date, uid, cid)
 	if err != nil {
 		log.Printf("visits %s/%s/%s:%v", uid, cid, ctx.Param("date"), err)
 		return apiserv.NewJSONErrorResponse(500)
