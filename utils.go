@@ -148,7 +148,7 @@ func verifyUserCampaign(ctx context.Context, c *Client, uid, cid string) bool {
 }
 
 func stripErr(err error) error {
-	if strings.Contains(err.Error(), "http") {
+	if err != nil && strings.Contains(err.Error(), "http") {
 		return ErrInternal
 	}
 

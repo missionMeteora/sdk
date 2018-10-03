@@ -53,7 +53,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := apiserv.New()
+	s := apiserv.New(apiserv.SetNoCatchPanics(true))
 	ch := &clientHandler{
 		g:  s.Group(*apiPrefix),
 		sc: sc,

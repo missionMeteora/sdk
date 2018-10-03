@@ -335,8 +335,6 @@ func (c *Client) Clicks(ctx context.Context, clicksAddr string, date time.Time, 
 		u = fmt.Sprintf(clicksAddr+"/%s/%s/%d/%d", uid, cid, start.Unix(), end.Unix())
 	)
 
-	log.Println(u)
-
 	err = stripErr(c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
 		out, err = ioutil.ReadAll(r)
 		return err
@@ -366,8 +364,6 @@ func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, 
 
 		u = fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cid, start.Unix(), end.Unix())
 	)
-
-	log.Println(u)
 
 	err = stripErr(c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
 		out, err = ioutil.ReadAll(r)
