@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
+	"encoding/json"
 
 	"github.com/PathDNA/ptk"
 
@@ -41,6 +42,7 @@ type Visit struct {
 	StoreName   string `json:"storeName,omitempty"`
 	StoreID     string `json:"storeID,omitempty"`
 	TS          int64  `json:"ts,omitempty"`
+	IFA         string `json:"IFA,omitempty"`
 }
 
 // ImpClick has the numbers of imps and clicks for a domain
@@ -335,13 +337,15 @@ func (c *Client) Clicks(ctx context.Context, clicksAddr string, date time.Time, 
 		u = fmt.Sprintf(clicksAddr+"/%s/%s/%d/%d", uid, cid, start.Unix(), end.Unix())
 	)
 
-	err = stripErr(c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
+	err = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
 		out, err = ioutil.ReadAll(r)
 		return err
-	}))
+	})
 
 	return
 }
+
+ 
 
 func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, uid, cid string) (out []byte, err error) {
 	if visitsAddr == "" {
@@ -350,8 +354,7 @@ func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, 
 	}
 
 	if cid == "" || cid == "-1" {
-		err = ErrMissingCID
-		return
+		cid = "-1"
 	}
 
 	if !verifyUserCampaign(ctx, c, uid, cid) {
@@ -359,16 +362,35 @@ func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, 
 		return
 	}
 
-	var (
-		start, end = MidnightToMidnight(date.UTC())
-
-		u = fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cid, start.Unix(), end.Unix())
-	)
-
-	err = stripErr(c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
-		out, err = ioutil.ReadAll(r)
-		return err
-	}))
+	if cid == "-1" {
+		var visits []Visit
+		cmps, _ := c.ListCampaigns(ctx, uid)
+		for cmpID, _ := range cmps {
+			var (
+				cidVisits []Visit
+				start, end = MidnightToMidnight(date.UTC())
+		
+				u = fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cmpID, start.Unix(), end.Unix())
+			)
+		
+			err = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, &cidVisits)
+			if err != nil {
+				visits = append(visits, cidVisits...)
+			}
+		}
+		out, _ = json.Marshal(visits)
+	} else {
+		var (
+			start, end = MidnightToMidnight(date.UTC())
+	
+			u = fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cid, start.Unix(), end.Unix())
+		)
+	
+		err = c.c.RequestCtx(ctx, "GET", "application/json", u, nil, func(r io.Reader) error {
+			out, err = ioutil.ReadAll(r)
+			return err
+		})
+	}
 
 	return
 }
