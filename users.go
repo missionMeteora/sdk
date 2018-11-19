@@ -14,6 +14,7 @@ type Agency struct {
 // Advertiser represents an advertiser user
 type Advertiser struct {
 	ID           string `json:"id"`
+	PathID       string `json:"pathID"`
 	AgencyID     string `json:"agencyID"`
 	Name         string `json:"name"`
 	NumCampaigns int    `json:"numCmps"`

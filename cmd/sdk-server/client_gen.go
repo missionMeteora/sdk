@@ -355,6 +355,12 @@ func (ch *clientHandler) ListAdvertisers(ctx *apiserv.Context) apiserv.Response 
 		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
 	}
 
+	if m, ok := pathIDsMap.Load().(map[string]string); ok {
+		for _, adv := range data {
+			adv.PathID = m[adv.ID]
+		}
+	}
+
 	return apiserv.NewJSONResponse(data)
 }
 

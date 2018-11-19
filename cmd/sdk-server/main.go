@@ -6,18 +6,19 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"sync/atomic"
 	"time"
 
-	"github.com/PathDNA/ssync"
-
+	"github.com/PathDNA/ptk"
 	"github.com/PathDNA/ptk/cache"
+	"github.com/PathDNA/ssync"
 	"github.com/missionMeteora/apiserv"
 	"github.com/missionMeteora/sdk"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (
-	version = "sdk " + sdk.Version + " (server v0.1)"
+	version = "sdk " + sdk.Version + " (server v0.3)"
 
 	clientCacheTimeout       = time.Hour * 24
 	maxReportingCallsPerHour = 100
@@ -33,6 +34,7 @@ var (
 	ssyncAddr  = kingpin.Flag("ssyncAddr", "ssync addr").String()
 	clicksAddr = kingpin.Flag("clicksAddr", "clicks addr").String()
 	visitsAddr = kingpin.Flag("visitsAddr", "visits addr").String()
+	pathAddr   = kingpin.Flag("pathAddr", "path addr").String()
 
 	letsEnc = kingpin.Flag("letsencrypt", "run production letsencrypt, addr must be set to a valid hostname").Short('s').Bool()
 
@@ -40,6 +42,8 @@ var (
 
 	pongResp = apiserv.NewJSONResponse("pong")
 	verResp  = apiserv.NewJSONResponse(version)
+
+	pathIDsMap atomic.Value
 )
 
 func main() {
@@ -84,6 +88,12 @@ func main() {
 	} else {
 		ch.addr = *apiAddr
 	}
+
+	if *pathAddr != "" {
+		log.Printf("running path ids mapper")
+		go updatePathIDsMap(*pathAddr)
+	}
+
 	ch.init()
 
 	if *letsEnc {
@@ -354,4 +364,15 @@ func (ch *clientHandler) GetVisits(ctx *apiserv.Context) apiserv.Response {
 	}
 
 	return apiserv.PlainResponse(apiserv.MimeJSON, visits)
+}
+
+func updatePathIDsMap(url string) {
+	for {
+		var resp map[string]string
+		ptk.Request("GET", "", url, nil, &resp)
+		if len(resp) > 0 {
+			pathIDsMap.Store(resp)
+		}
+		time.Sleep(time.Minute * 30)
+	}
 }
