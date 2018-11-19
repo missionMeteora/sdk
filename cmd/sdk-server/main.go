@@ -374,7 +374,7 @@ func updatePathIDsMap(url string) {
 		if len(resp) > 0 {
 			m := make(map[string]string, len(resp))
 			for pid, mid := range resp {
-				m[mid] = min(pid, m[mid])
+				m[mid] = min(m[mid], pid)
 			}
 			pathIDsMap.Store(m)
 		}
