@@ -122,7 +122,7 @@ type clientHandler struct {
 func (ch *clientHandler) getClient(ctx *apiserv.Context) (c *sdk.Client) {
 	defer func() {
 		if x := recover(); x != nil {
-			log.Printf("%T: %#+v", x, x)
+			log.Printf("%T: %v", x, x)
 			ctx.JSON(http.StatusInternalServerError, true, x)
 		}
 	}()
