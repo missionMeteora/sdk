@@ -12,7 +12,7 @@ type ProximitySegment struct {
 	OwnerID string `json:"ownerID"`
 
 	// Current location id
-	IDCounter int `json:"idCounter"`
+	IDCounter int `json:"idCounter,omitempty"`
 
 	// List of locations
 	Locations []*Location `json:"locations"`
@@ -20,7 +20,7 @@ type ProximitySegment struct {
 	DeletedLocations []*Location `json:"deletedLocations,omitempty"`
 
 	// Lookback period
-	Lookback int16 `json:"lookback"`
+	Lookback int16 `json:"lookback,omitempty"`
 }
 
 // Location represents a specified location
@@ -115,6 +115,32 @@ func (c *Client) ListProximitySegments(ctx context.Context, uid string) (segs ma
 
 	for id, seg := range segs {
 		seg.ID = id
+	}
+
+	return
+}
+
+// ListProxSegments will list the store visits belonging to a given user ID
+func (c *Client) ListStoreVisits(ctx context.Context, uid string) (segs map[string]*ProximitySegment, err error) {
+	if uid == "" {
+		err = ErrMissingUID
+		return
+	}
+
+	var resp struct {
+		Data map[string]*ProximitySegment `json:"data"`
+	}
+
+	if err = c.rawGet(ctx, "segments/inStoreVisits/byOwner/"+uid, &resp); err != nil {
+		return
+	}
+
+	segs = resp.Data
+
+	for id, seg := range segs {
+		seg.ID = id
+		seg.IDCounter = 0
+		seg.Lookback = 0
 	}
 
 	return

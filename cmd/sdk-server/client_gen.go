@@ -428,6 +428,20 @@ func (ch *clientHandler) ListSegments(ctx *apiserv.Context) apiserv.Response {
 	return apiserv.NewJSONResponse(data)
 }
 
+func (ch *clientHandler) ListStoreVisits(ctx *apiserv.Context) apiserv.Response {
+	c := ch.getClient(ctx)
+	if ctx.Done() {
+		return nil
+	}
+
+	data, err := c.ListStoreVisits(context.Background(), ctx.Param("uid"))
+	if err != nil {
+		return apiserv.NewJSONErrorResponse(http.StatusBadRequest, err)
+	}
+
+	return apiserv.NewJSONResponse(data)
+}
+
 func (ch *clientHandler) UpdateAd(ctx *apiserv.Context) apiserv.Response { // method:PUT
 	c := ch.getClient(ctx)
 	if ctx.Done() {
@@ -550,6 +564,7 @@ func (ch *clientHandler) init() {
 	ch.g.AddRoute("GET", "/draftCampaigns/:uid", ch.ListDraftCampaigns)
 	ch.g.AddRoute("GET", "/proximitySegments/:uid", ch.ListProximitySegments)
 	ch.g.AddRoute("GET", "/segments/:uid", ch.ListSegments)
+	ch.g.AddRoute("GET", "/storeVisits/:uid", ch.ListStoreVisits)
 	ch.g.AddRoute("PUT", "/ad", ch.UpdateAd)
 	ch.g.AddRoute("PUT", "/campaign", ch.UpdateCampaign)
 	ch.g.AddRoute("PUT", "/draftCampaign", ch.UpdateDraftCampaign)
