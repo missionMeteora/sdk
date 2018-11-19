@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"sync/atomic"
 	"time"
 
@@ -373,10 +374,23 @@ func updatePathIDsMap(url string) {
 		if len(resp) > 0 {
 			m := make(map[string]string, len(resp))
 			for pid, mid := range resp {
-				m[mid] = pid
+				m[mid] = min(pid, m[mid])
 			}
 			pathIDsMap.Store(m)
 		}
 		time.Sleep(time.Minute * 30)
 	}
+}
+
+func min(a, b string) string {
+	ai, bi := atoi(a), atoi(b)
+	if ai < bi {
+		return a
+	}
+	return b
+}
+
+func atoi(s string) uint64 {
+	i, _ := strconv.ParseUint(s, 10, 64)
+	return v
 }
