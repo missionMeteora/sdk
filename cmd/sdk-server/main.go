@@ -392,5 +392,5 @@ func min(a, b string) string {
 
 func atoi(s string) uint64 {
 	i, _ := strconv.ParseUint(s, 10, 64)
-	return v
+	return i
 }
