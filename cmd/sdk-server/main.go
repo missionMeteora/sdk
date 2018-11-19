@@ -371,7 +371,11 @@ func updatePathIDsMap(url string) {
 		var resp map[string]string
 		ptk.Request("GET", "", url, nil, &resp)
 		if len(resp) > 0 {
-			pathIDsMap.Store(resp)
+			m := make(map[string]string, len(resp))
+			for pid, mid := range resp {
+				m[mid] = pid
+			}
+			pathIDsMap.Store(m)
 		}
 		time.Sleep(time.Minute * 30)
 	}
