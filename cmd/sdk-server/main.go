@@ -384,7 +384,7 @@ func updatePathIDsMap(url string) {
 
 func min(a, b string) string {
 	ai, bi := atoi(a), atoi(b)
-	if ai < bi {
+	if ai > 0 && ai < bi {
 		return a
 	}
 	return b
