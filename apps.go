@@ -76,6 +76,17 @@ type UUIDTargeting struct {
 func (UUIDTargeting) Name() string { return "uuidTargeting" }
 func (UUIDTargeting) app()         {}
 
+type SpecificTargeting struct {
+	Status    bool     `json:"status"`
+	Inventory []string `json:"inventory,omitempty"`
+	Devices   []string `json:"devices,omitempty"`
+	Browsers  []string `json:"browsers,omitempty"`
+	Exchanges []string `json:"exchanges,omitempty"`
+}
+
+func (SpecificTargeting) Name() string { return "specificTargeting" }
+func (SpecificTargeting) app()         {}
+
 // SetApp is a little helper func to add apps to campaigns.
 func SetApp(cmp *Campaign, app App) {
 	if cmp.Apps == nil {
