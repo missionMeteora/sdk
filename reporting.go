@@ -218,6 +218,9 @@ type Receipt struct {
 	ExInfo  string `json:"exInfo,omitempty"` // Miscellaneous exchange information
 
 	PxID string `json:"pxID,omitempty"` // Proximity target id
+
+	Lat  float64 `json:"lat,omitempty"`
+	Long float64 `json:"long,omitempty"`
 }
 
 func (c *Client) Receipts(ctx context.Context, sc *ssync.Client, date time.Time, uid, cid string) (out []byte, err error) {
