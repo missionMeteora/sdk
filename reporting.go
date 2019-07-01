@@ -231,7 +231,7 @@ func (c *Client) Receipts(ctx context.Context, sc *ssync.Client, date time.Time,
 
 	const (
 		tsAndSepLen = len("1538006719@")
-		bufSize     = 1 << 17 // 128kb
+		bufSize     = 1 << 22 // 4MB
 	)
 
 	if uid == "" || !isNumber(uid) || !verifyUserCampaign(ctx, c, uid, cid) {
@@ -246,7 +246,7 @@ func (c *Client) Receipts(ctx context.Context, sc *ssync.Client, date time.Time,
 	var (
 		files    []*ssync.FileInfo
 		basePath = filepath.Join("receipts", date.Format("2006/01/02"))
-		sem      = ptk.NewSem(10)
+		sem      = ptk.NewSem(40)
 		m        = []byte(getMatchString(uid, cid))
 		mux      sync.Mutex
 		buf      = bytes.NewBuffer(make([]byte, 0, bufSize))
