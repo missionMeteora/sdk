@@ -58,7 +58,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := apiserv.New(apiserv.SetNoCatchPanics(true))
+	s := apiserv.New(apiserv.SetNoCatchPanics(true), apiserv.ReadTimeout(5*time.Minute), apiserv.WriteTimeout(5*time.Minute))
 	ch := &clientHandler{
 		g:  s.Group(*apiPrefix),
 		sc: sc,
