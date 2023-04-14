@@ -12,10 +12,10 @@ import (
 
 	"github.com/PathDNA/ptk"
 	"github.com/PathDNA/ptk/cache"
-	"github.com/PathDNA/ssync"
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/missionMeteora/apiserv"
 	"github.com/missionMeteora/sdk"
-	"gopkg.in/alecthomas/kingpin.v2"
+	"github.com/missionMeteora/ssync"
 )
 
 const (
@@ -60,7 +60,7 @@ func main() {
 
 	s := apiserv.New(apiserv.SetNoCatchPanics(true), apiserv.ReadTimeout(5*time.Minute), apiserv.WriteTimeout(5*time.Minute))
 	ch := &clientHandler{
-		g:  s.Group(*apiPrefix),
+		g:  s.Group("api", *apiPrefix),
 		sc: sc,
 		c:  cache.NewMemCache(time.Minute * 15),
 	}

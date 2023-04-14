@@ -16,7 +16,7 @@ import (
 
 	"github.com/PathDNA/ptk"
 
-	"github.com/PathDNA/ssync"
+	"github.com/missionMeteora/ssync"
 )
 
 var (
@@ -34,7 +34,7 @@ type CampaignReport struct {
 	Visits  []Visit             `json:"visits,omtiempty"` // est visits please see terms
 }
 
-/// Visit is a single visit details
+// / Visit is a single visit details
 type Visit struct {
 	CampaignID  string `json:"cid,omitempty"`
 	ProximityID string `json:"pxID,omitempty"`
@@ -129,7 +129,7 @@ type AdsListItem struct {
 	Data *Ad    `json:"data"`
 }
 
-//Heatmap contains the raw Heatmap data from API
+// Heatmap contains the raw Heatmap data from API
 type Heatmap struct {
 	AdsList []*AdsListItem `json:"adsList"`
 	Clicks  []*Click       `json:"clicks"`
@@ -380,7 +380,7 @@ func (c *Client) Visits(ctx context.Context, visitsAddr string, date time.Time, 
 		cmps, _ = c.ListCampaigns(ctx, uid)
 	)
 
-	for cmpID, _ := range cmps {
+	for cmpID := range cmps {
 		var (
 			cidVisits []Visit
 			u         = fmt.Sprintf(visitsAddr+"&cid=%s&start=%d&end=%d", cmpID, start.Unix(), end.Unix())

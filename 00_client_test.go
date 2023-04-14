@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/PathDNA/ssync"
+	"github.com/missionMeteora/ssync"
 
 	TU "github.com/PathDNA/testutils"
 	"github.com/missionMeteora/sdk"
